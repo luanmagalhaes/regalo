@@ -59,6 +59,28 @@ textarea {
   font-family: var(--font-body);
 }
 
+input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: 3.25rem;
+  line-height: 1.2;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+  min-height: auto;
+}
+
+input[type="date"]::-webkit-datetime-edit {
+  padding: 0;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.55;
+  cursor: pointer;
+}
+
 @utility display {
   font-family: var(--font-display);
   font-weight: 700;
