@@ -104,7 +104,7 @@ export function RegaloApp() {
 
 
 
-  const splash = splashDone ? null : <SplashScreen onDone={() => setSplashDone(true)} />;
+  const splash = splashDone ? null : <SplashScreen muted={prefs.muted} onDone={() => setSplashDone(true)} />;
   const helpOpen = splashDone && (askedHelp || !prefs.tutorialSeen);
   const help = helpOpen ? (
     <HowItWorks

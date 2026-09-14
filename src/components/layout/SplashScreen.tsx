@@ -3,29 +3,33 @@
 import { useEffect, useState } from "react";
 import { GiftArt } from "@/components/ui/GiftArt";
 import { brand } from "@/data/copy";
-import { sound, unlockSound } from "@/lib/sound";
+import { playJingle, primeJingle } from "@/lib/jingle";
+import { unlockSound } from "@/lib/sound";
 
 const holdMs = 1900;
 const fadeMs = 560;
 
 interface SplashScreenProps {
+  muted: boolean;
   onDone: () => void;
 }
 
-export function SplashScreen({ onDone }: SplashScreenProps) {
+export function SplashScreen({ muted, onDone }: SplashScreenProps) {
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
     unlockSound();
 
-    const music = window.setTimeout(() => sound.opening(), 120);
+    primeJingle();
+
+    const music = window.setTimeout(() => playJingle(muted), 120);
     const start = window.setTimeout(() => setLeaving(true), holdMs);
 
     return () => {
       window.clearTimeout(music);
       window.clearTimeout(start);
     };
-  }, []);
+  }, [muted]);
 
   useEffect(() => {
     if (!leaving) {

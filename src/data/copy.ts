@@ -45,7 +45,7 @@ export const copy = {
     nameTaken: "Já tem alguém com esse nome na turma.",
     labelRequired: "Dê um nome para o item.",
     valueRequired: "Escreva o tamanho ou a medida.",
-    birthdayInvalid: "Essa data não existe. Confira o dia e o mês.",
+    birthdayInvalid: "Essa data de nascimento não serve. Confira o dia, o mês e o ano.",
     tagEmpty: "Escreva alguma coisa antes de adicionar.",
   },
 } as const;

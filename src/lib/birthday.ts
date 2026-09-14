@@ -109,7 +109,9 @@ export function currentAge(value: string | null, now: Date = new Date()): number
     return null;
   }
 
-  return distance === 0 ? turning : turning - 1;
+  const age = distance === 0 ? turning : turning - 1;
+
+  return age < 0 ? null : age;
 }
 
 export function isNear(value: string | null, now: Date = new Date()): boolean {

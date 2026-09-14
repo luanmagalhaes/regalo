@@ -121,7 +121,16 @@ function birthdayValue(value: unknown): string | null {
   }
 
   if (typeof value !== "string" || !parseBirthday(value)) {
-    throw new ServiceError("essa data de aniversário não existe", 422);
+    throw new ServiceError("essa data de nascimento não existe", 422);
+  }
+
+  const today = new Date();
+  const limit = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(
+    today.getDate(),
+  ).padStart(2, "0")}`;
+
+  if (value > limit) {
+    throw new ServiceError("data de nascimento não pode estar no futuro", 422);
   }
 
   return value;

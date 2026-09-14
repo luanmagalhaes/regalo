@@ -163,12 +163,12 @@ export function NewProfileSheet({ busy, onCreate, onClose }: NewProfileSheetProp
         />
 
         <TextField
-          label="Aniversário (opcional)"
+          label="Data de nascimento (opcional)"
           type="date"
           value={birthday}
           min="1900-01-01"
-          max="2100-12-31"
-          hint="Com a data, o aviso chega 15 dias antes."
+          max={new Date().toISOString().slice(0, 10)}
+          hint="Dia, mês e ano de nascimento. Com ela, o aviso chega 15 dias antes."
           onChange={(event) => {
             setBirthday(event.target.value);
             setProblem(null);

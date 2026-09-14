@@ -159,12 +159,12 @@ export function ProfileSettingsSheet({
         </div>
 
         <TextField
-          label="Aniversário"
+          label="Data de nascimento"
           type="date"
           value={birthday}
           min="1900-01-01"
-          max="2100-12-31"
-          hint="Serve para o aviso chegar 15 dias antes."
+          max={new Date().toISOString().slice(0, 10)}
+          hint="Dia, mês e ano em que você nasceu. É daqui que sai o aviso 15 dias antes."
           onChange={(event) => {
             setBirthday(event.target.value);
             setProblem(null);
