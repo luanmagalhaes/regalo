@@ -52,7 +52,6 @@ export function ProfileScreen({
   const age = currentAge(profile.birthday);
   const date = birthdayLabel(profile.birthday);
 
-  const [decorating, setDecorating] = useState(false);
   const [pickingSticker, setPickingSticker] = useState(false);
   const [openItem, setOpenItem] = useState<ProfileItem | null>(null);
   const [creatingItem, setCreatingItem] = useState(false);
@@ -75,14 +74,14 @@ export function ProfileScreen({
         id: crypto.randomUUID(),
         emoji,
         x: 20 + Math.random() * 60,
-        y: 22 + Math.random() * 50,
+        y: 62 + Math.random() * 24,
         scale: 1,
         rotation: Math.round(Math.random() * 30 - 15),
       },
     ];
 
     setPickingSticker(false);
-    setDecorating(true);
+    setLocalStickers(next);
     commitStickers(next);
   };
 
@@ -90,59 +89,66 @@ export function ProfileScreen({
     <Screen
       stage={palette.stage}
       footer={
-        <div className="flex items-center gap-2">
-          <Button variant="paper" size="lg" onClick={onBack}>
-            ← Turma
-          </Button>
-          <Button
-            variant="candy"
-            size="lg"
-            fullWidth
-            disabled={busy}
-            onClick={() => {
-              sound.tap();
-              setCreatingItem(true);
-            }}
-          >
-            + Guardar um tamanho
-          </Button>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Button variant="paper" size="lg" onClick={onBack}>
+              ← Turma
+            </Button>
+            <Button
+              variant="candy"
+              size="lg"
+              fullWidth
+              disabled={busy}
+              onClick={() => {
+                sound.tap();
+                setCreatingItem(true);
+              }}
+            >
+              + Guardar um item
+            </Button>
+          </div>
+
+          {isMe ? (
+            <p className="display text-center text-xs text-ink/55">
+              ✓ Esse perfil é o seu. {brand.ownerCall}
+            </p>
+          ) : (
+            <Button
+              variant="mint"
+              size="md"
+              fullWidth
+              onClick={() => {
+                sound.party();
+                onClaim();
+              }}
+            >
+              🙋 Esse sou eu
+            </Button>
+          )}
         </div>
       }
     >
       <div className="flex flex-col gap-4 pb-4">
-        <div className="flex items-center justify-between gap-2">
-          <span className="display rounded-full border-[3px] border-ink bg-paper px-3 py-1.5 text-xs text-ink">
+        <div className="flex justify-center">
+          <span className="display rounded-full border-[3px] border-ink bg-paper px-3 py-1.5 text-center text-xs text-ink">
             {isMe ? brand.ownerCall : `Espaço de ${profile.name}`}
           </span>
-
-          {isMe ? null : (
-            <button
-              type="button"
-              onClick={() => {
-                sound.pick();
-                onClaim();
-              }}
-              className="display rounded-full border-[3px] border-ink bg-baunilha px-3 py-1.5 text-xs text-ink transition-transform hover:-translate-y-[2px]"
-            >
-              Esse sou eu
-            </button>
-          )}
         </div>
 
         <section className="scoop relative overflow-hidden rounded-[1.75rem] border-[3px] border-ink bg-paper p-5">
           <div className="sprinkles pointer-events-none absolute inset-0" aria-hidden />
 
-          <StickerLayer
-            stickers={stickers}
-            editing={decorating}
-            onChange={setLocalStickers}
-            onCommit={commitStickers}
-          />
-
           <div className="relative flex flex-col items-center gap-2 text-center">
-            <span className="animate-float-soft text-6xl" aria-hidden>
-              {profile.emoji}
-            </span>
+            {profile.photo ? (
+              <span className="h-24 w-24 overflow-hidden rounded-3xl border-[3px] border-ink">
+                <img src={profile.photo} alt={profile.name} className="h-full w-full object-cover" />
+              </span>
+            ) : (
+              <span className="animate-float-soft text-6xl" aria-hidden>
+                {profile.emoji}
+              </span>
+            )}
+
             <h1 className="display text-3xl leading-tight text-ink">{profile.name}</h1>
 
             {date ? (
@@ -182,25 +188,13 @@ export function ProfileScreen({
             >
               ✨ Colar adesivo
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                sound.tap();
-                setDecorating((current) => !current);
-              }}
-              className={`display rounded-2xl border-[3px] border-ink px-3 py-1.5 text-xs text-ink transition-transform hover:-translate-y-[2px] ${
-                decorating ? "bg-baunilha" : "bg-cream"
-              }`}
-            >
-              {decorating ? "✓ Terminei de arrastar" : "🖐️ Arrastar adesivos"}
-            </button>
           </div>
 
-          {decorating ? (
-            <p className="relative mt-2 text-center text-xs text-ink/60">
-              {copy.profile.stickersHint} Toque em um adesivo para girar, aumentar ou tirar.
-            </p>
-          ) : null}
+          <p className="relative mt-2 text-center text-xs text-ink/55">
+            {copy.profile.stickersHint}
+          </p>
+
+          <StickerLayer stickers={stickers} onChange={setLocalStickers} onCommit={commitStickers} />
         </section>
 
         {error ? (
@@ -208,6 +202,35 @@ export function ProfileScreen({
             {error}
           </p>
         ) : null}
+
+        <section className="scoop-sm rounded-3xl border-[3px] border-ink bg-paper p-4">
+          <div className="flex items-center gap-2">
+            <span aria-hidden className="text-xl">
+              💌
+            </span>
+            <h3 className="display text-base text-ink">{copy.profile.wishTitle}</h3>
+          </div>
+
+          <p className="mt-1 text-xs text-ink/55">{copy.profile.wishHint}</p>
+
+          <textarea
+            key={`wish-${profile.id}`}
+            defaultValue={profile.wish}
+            maxLength={600}
+            rows={4}
+            lang="pt-BR"
+            placeholder="Escreva solto: marca, cor, tamanho da caneca, aquele jogo que você quer, o que já tem repetido..."
+            onBlur={(event) => {
+              const next = event.target.value.trim();
+
+              if (next !== profile.wish) {
+                sound.saved();
+                onPatch({ wish: next });
+              }
+            }}
+            className="mt-2 w-full resize-none rounded-2xl border-[3px] border-ink bg-cream px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-ink/35 focus:ring-4 focus:ring-morango/25"
+          />
+        </section>
 
         <section>
           <div className="mb-2 flex items-baseline justify-between">
@@ -290,7 +313,7 @@ export function ProfileScreen({
           </div>
 
           <textarea
-            key={profile.id}
+            key={`care-${profile.id}`}
             defaultValue={profile.care}
             maxLength={280}
             rows={2}
@@ -308,8 +331,8 @@ export function ProfileScreen({
         </section>
 
         <section className="scoop-sm rounded-3xl border-[3px] border-ink bg-paper p-4">
-          <h3 className="display mb-2 text-base text-ink">Conquistas</h3>
-          <BadgeShelf progress={progress} />
+          <h3 className="display mb-1 text-base text-ink">Medalhas do perfil</h3>
+          <BadgeShelf progress={progress} palette={palette} />
         </section>
       </div>
 

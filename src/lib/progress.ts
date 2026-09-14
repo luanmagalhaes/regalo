@@ -5,6 +5,7 @@ export interface Badge {
   emoji: string;
   title: string;
   hint: string;
+  todo: string;
   earned: boolean;
 }
 
@@ -14,7 +15,7 @@ export interface Progress {
   percent: number;
   level: number;
   levelTitle: string;
-  toNextLevel: number;
+  nextStep: string | null;
   badges: Badge[];
 }
 
@@ -33,76 +34,91 @@ function filledItems(profile: Profile): number {
 }
 
 export function progressFor(profile: Profile): Progress {
-  const goals = [
-    profile.items.length > 0,
-    filledItems(profile) >= 5,
-    filledItems(profile) >= 10,
-    Boolean(profile.birthday),
-    profile.loves.length > 0,
-    profile.dislikes.length > 0 || profile.plenty.length > 0,
-    profile.stickers.length > 0,
-    profile.items.every((item) => !item.pending) && profile.items.length > 0,
-  ];
-
-  const total = goals.length;
-  const filled = goals.filter(Boolean).length;
-  const percent = Math.round((filled / total) * 100);
-  const level = Math.max(1, Math.min(maxLevel, Math.ceil((filled / total) * maxLevel)));
-  const perLevel = total / maxLevel;
-  const toNextLevel = level >= maxLevel ? 0 : Math.max(1, Math.ceil(level * perLevel) - filled + 1);
+  const filled = filledItems(profile);
 
   const badges: Badge[] = [
     {
       key: "first-item",
       emoji: "🎀",
       title: "Primeiro tamanho",
-      hint: "Guardou pelo menos uma medida",
-      earned: goals[0],
+      hint: "Você guardou pelo menos um item no perfil.",
+      todo: "Toque no + e guarde o primeiro item.",
+      earned: profile.items.length > 0,
     },
     {
       key: "half-way",
       emoji: "🍦",
       title: "Meio sorvete",
-      hint: "Cinco medidas preenchidas",
-      earned: goals[1],
+      hint: "Cinco itens preenchidos no perfil.",
+      todo: `Preencha ${Math.max(0, 5 - filled)} item(ns) para chegar a cinco.`,
+      earned: filled >= 5,
+    },
+    {
+      key: "full-closet",
+      emoji: "🧁",
+      title: "Guarda-roupa inteiro",
+      hint: "Dez itens preenchidos. Quem for comprar não erra.",
+      todo: `Preencha ${Math.max(0, 10 - filled)} item(ns) para chegar a dez.`,
+      earned: filled >= 10,
     },
     {
       key: "birthday",
       emoji: "🎂",
       title: "Data marcada",
-      hint: "Colocou a data de aniversário",
-      earned: goals[3],
+      hint: "Seu aniversário está no tracker da turma.",
+      todo: "Toque em ajustar perfil e coloque sua data de aniversário.",
+      earned: Boolean(profile.birthday),
     },
     {
       key: "loves",
       emoji: "💝",
       title: "Deu a dica",
-      hint: "Contou o que ama ganhar",
-      earned: goals[4],
+      hint: "A turma sabe o que você ama ganhar.",
+      todo: "Escreva ao menos uma coisa em ama ganhar.",
+      earned: profile.loves.length > 0,
+    },
+    {
+      key: "honest",
+      emoji: "🙅",
+      title: "Sinceridade",
+      hint: "Você disse o que não curte ou o que já tem demais.",
+      todo: "Preencha não curte ou já tem demais.",
+      earned: profile.dislikes.length > 0 || profile.plenty.length > 0,
     },
     {
       key: "decorated",
       emoji: "✨",
       title: "Espaço decorado",
-      hint: "Colou pelo menos um adesivo no perfil",
-      earned: goals[6],
+      hint: "Tem adesivo colado no seu perfil.",
+      todo: "Toque em colar adesivo e escolha um emoji.",
+      earned: profile.stickers.length > 0,
     },
     {
       key: "confirmed",
       emoji: "🏆",
       title: "Tudo confirmado",
-      hint: "Nenhuma medida marcada como a confirmar",
-      earned: goals[7],
+      hint: "Nenhum item está marcado como a confirmar.",
+      todo: "Confirme os itens marcados com a etiqueta amarela.",
+      earned: profile.items.length > 0 && profile.items.every((item) => !item.pending),
     },
   ];
 
+  const total = badges.length;
+  const earned = badges.filter((badge) => badge.earned).length;
+  const percent = Math.round((earned / total) * 100);
+  const level =
+    earned >= total
+      ? maxLevel
+      : Math.max(1, Math.min(maxLevel - 1, Math.ceil((earned / total) * (maxLevel - 1))));
+  const missing = badges.find((badge) => !badge.earned);
+
   return {
-    filled,
+    filled: earned,
     total,
     percent,
     level,
     levelTitle: levelTitles[level - 1],
-    toNextLevel,
+    nextStep: missing ? missing.todo : null,
     badges,
   };
 }

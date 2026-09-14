@@ -20,7 +20,9 @@ const maxHintLength = 120;
 const maxTags = 24;
 const maxTagLength = 60;
 const maxCareLength = 280;
+const maxWishLength = 600;
 const maxStickers = 60;
+const maxPhotoLength = 300_000;
 const maxItems = 60;
 const maxProfiles = 40;
 
@@ -28,12 +30,14 @@ interface ProfileRow {
   id: string;
   name: string;
   emoji: string;
+  photo: string | null;
   birthday: string | null;
   palette: string;
   stickers: unknown;
   loves: unknown;
   dislikes: unknown;
   plenty: unknown;
+  wish: string | null;
   care: string | null;
   position: number;
 }
@@ -91,6 +95,22 @@ function paletteKey(value: unknown): PaletteKey {
   return value as PaletteKey;
 }
 
+function photoValue(value: unknown): string | null {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  if (typeof value !== "string" || !value.startsWith("data:image/")) {
+    throw new ServiceError("não reconheci esse arquivo como foto", 422);
+  }
+
+  if (value.length > maxPhotoLength) {
+    throw new ServiceError("essa foto ficou pesada demais", 413);
+  }
+
+  return value;
+}
+
 function birthdayValue(value: unknown): string | null {
   if (value === null || value === undefined || value === "") {
     return null;
@@ -141,12 +161,14 @@ function toProfile(row: ProfileRow, items: ItemRow[]): Profile {
     id: row.id,
     name: row.name,
     emoji: row.emoji,
+    photo: row.photo,
     birthday: row.birthday,
     palette: (row.palette in palettes ? row.palette : "morango") as PaletteKey,
     stickers: Array.isArray(row.stickers) ? (row.stickers as Sticker[]) : [],
     loves: Array.isArray(row.loves) ? (row.loves as string[]) : [],
     dislikes: Array.isArray(row.dislikes) ? (row.dislikes as string[]) : [],
     plenty: Array.isArray(row.plenty) ? (row.plenty as string[]) : [],
+    wish: row.wish ?? "",
     care: row.care ?? "",
     position: row.position,
     items: items
@@ -214,6 +236,7 @@ export async function createProfile(body: unknown): Promise<Profile> {
   const emoji = text(input.emoji ?? "🎁", "o emoji", 8);
   const palette = paletteKey(input.palette ?? "morango");
   const birthday = birthdayValue(input.birthday ?? null);
+  const photo = photoValue(input.photo ?? null);
 
   await assertNameFree(name);
 
@@ -232,7 +255,7 @@ export async function createProfile(body: unknown): Promise<Profile> {
 
   const { data, error } = await db
     .from("profiles")
-    .insert({ name, emoji, palette, birthday, position: count ?? 0 })
+    .insert({ name, emoji, palette, birthday, photo, position: count ?? 0 })
     .select("*")
     .single();
 
@@ -265,6 +288,10 @@ export async function updateProfile(id: string, body: unknown): Promise<Profile>
     patch.birthday = birthdayValue(input.birthday);
   }
 
+  if ("photo" in input) {
+    patch.photo = photoValue(input.photo);
+  }
+
   if ("stickers" in input) {
     patch.stickers = stickerList(input.stickers);
   }
@@ -279,6 +306,10 @@ export async function updateProfile(id: string, body: unknown): Promise<Profile>
 
   if ("plenty" in input) {
     patch.plenty = tagList(input.plenty, "a lista do que já tem demais");
+  }
+
+  if ("wish" in input) {
+    patch.wish = text(input.wish, "a dica", maxWishLength, false);
   }
 
   if ("care" in input) {

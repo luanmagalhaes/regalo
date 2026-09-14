@@ -32,12 +32,14 @@ export interface Profile {
   id: string;
   name: string;
   emoji: string;
+  photo: string | null;
   birthday: string | null;
   palette: PaletteKey;
   stickers: Sticker[];
   loves: string[];
   dislikes: string[];
   plenty: string[];
+  wish: string;
   care: string;
   position: number;
   items: ProfileItem[];
@@ -46,6 +48,7 @@ export interface Profile {
 export interface ProfileDraft {
   name: string;
   emoji: string;
+  photo: string | null;
   birthday: string | null;
   palette: PaletteKey;
 }

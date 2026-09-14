@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { GateScreen } from "@/components/layout/GateScreen";
+import { HowItWorks } from "@/components/layout/HowItWorks";
+import { SplashScreen } from "@/components/layout/SplashScreen";
 import { HomeScreen } from "@/components/home/HomeScreen";
 import { NewProfileSheet } from "@/components/home/NewProfileSheet";
 import { ProfileScreen } from "@/components/profile/ProfileScreen";
@@ -13,21 +15,18 @@ import {
   rememberMe,
   rememberMuted,
   rememberNoticed,
+  rememberTutorialSeen,
   serverPrefsSnapshot,
   subscribePrefs,
 } from "@/lib/prefs";
 import { applyMuted, sound, unlockSound } from "@/lib/sound";
+import {
+  askPushPermission,
+  pushSnapshot,
+  serverPushSnapshot,
+  subscribePush,
+} from "@/lib/push";
 import type { ItemDraft, Profile, ProfileDraft } from "@/types/profile";
-
-type PushState = "unsupported" | "default" | "granted" | "denied";
-
-function pushState(): PushState {
-  if (typeof window === "undefined" || !("Notification" in window)) {
-    return "unsupported";
-  }
-
-  return Notification.permission as PushState;
-}
 
 export function RegaloApp() {
   const { profiles, gate, setGate, error, setError, loading, refresh, addProfile, replaceProfile, dropProfile } =
@@ -36,7 +35,9 @@ export function RegaloApp() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [push, setPush] = useState<PushState>("unsupported");
+  const push = useSyncExternalStore(subscribePush, pushSnapshot, serverPushSnapshot);
+  const [splashDone, setSplashDone] = useState(false);
+  const [askedHelp, setAskedHelp] = useState(false);
   const noticedRef = useRef<string[]>([]);
 
   useEffect(() => {
@@ -48,8 +49,6 @@ export function RegaloApp() {
   }, [prefs.noticed]);
 
   useEffect(() => {
-    setPush(pushState());
-
     const prime = () => unlockSound();
 
     window.addEventListener("pointerdown", prime, { once: true });
@@ -58,7 +57,7 @@ export function RegaloApp() {
   }, []);
 
   useEffect(() => {
-    if (pushState() !== "granted") {
+    if (pushSnapshot() !== "granted") {
       return;
     }
 
@@ -112,27 +111,35 @@ export function RegaloApp() {
   );
 
   const askPush = useCallback(() => {
-    if (!("Notification" in window)) {
-      return;
-    }
-
-    void Notification.requestPermission().then((answer) => {
-      setPush(answer as PushState);
-
+    void askPushPermission().then((answer) => {
       if (answer === "granted") {
         sound.party();
       }
     });
   }, []);
 
+  const splash = splashDone ? null : <SplashScreen onDone={() => setSplashDone(true)} />;
+  const helpOpen = splashDone && (askedHelp || !prefs.tutorialSeen);
+  const help = helpOpen ? (
+    <HowItWorks
+      onClose={() => {
+        setAskedHelp(false);
+        rememberTutorialSeen();
+      }}
+    />
+  ) : null;
+
   if (gate === "locked") {
     return (
-      <GateScreen
-        onOpen={() => {
-          setGate("checking");
-          void refresh();
-        }}
-      />
+      <>
+        {splash}
+        <GateScreen
+          onOpen={() => {
+            setGate("checking");
+            void refresh();
+          }}
+        />
+      </>
     );
   }
 
@@ -146,7 +153,10 @@ export function RegaloApp() {
       );
 
     return (
-      <ProfileScreen
+      <>
+        {splash}
+        {help}
+        <ProfileScreen
         profile={open}
         isMe={prefs.me === open.id}
         busy={busy}
@@ -196,12 +206,15 @@ export function RegaloApp() {
               }),
           )
         }
-      />
+        />
+      </>
     );
   }
 
   return (
     <>
+      {splash}
+      {help}
       <HomeScreen
         profiles={profiles}
         meId={prefs.me}
@@ -221,6 +234,7 @@ export function RegaloApp() {
         }}
         onOpen={(profile: Profile) => setOpenId(profile.id)}
         onCreate={() => setCreating(true)}
+        onHelp={() => setAskedHelp(true)}
       />
 
       {creating ? (

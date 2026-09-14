@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { PhotoPicker } from "@/components/ui/PhotoPicker";
 import { Sheet } from "@/components/ui/Sheet";
 import { TextField } from "@/components/ui/TextField";
 import { copy } from "@/data/copy";
@@ -14,7 +15,13 @@ import type { Profile } from "@/types/profile";
 interface ProfileSettingsSheetProps {
   profile: Profile;
   busy: boolean;
-  onSave: (patch: { name: string; emoji: string; birthday: string | null; palette: string }) => void;
+  onSave: (patch: {
+    name: string;
+    emoji: string;
+    photo: string | null;
+    birthday: string | null;
+    palette: string;
+  }) => void;
   onDelete: () => void;
   onClose: () => void;
 }
@@ -28,6 +35,7 @@ export function ProfileSettingsSheet({
 }: ProfileSettingsSheetProps) {
   const [name, setName] = useState(profile.name);
   const [emoji, setEmoji] = useState(profile.emoji);
+  const [photo, setPhoto] = useState<string | null>(profile.photo);
   const [birthday, setBirthday] = useState(profile.birthday ?? "");
   const [palette, setPalette] = useState<string>(profile.palette);
   const [problem, setProblem] = useState<string | null>(null);
@@ -51,6 +59,7 @@ export function ProfileSettingsSheet({
     onSave({
       name: cleanName,
       emoji,
+      photo,
       birthday: birthday.length > 0 ? birthday : null,
       palette,
     });
@@ -90,9 +99,16 @@ export function ProfileSettingsSheet({
           }}
         />
 
+        <PhotoPicker
+          photo={photo}
+          emoji={emoji}
+          accent={paletteFor(palette).soft}
+          onPick={setPhoto}
+        />
+
         <div>
           <span className="display block text-xs uppercase tracking-[0.16em] text-ink/55">
-            Carinha
+            Carinha {photo ? "(aparece se não tiver foto)" : ""}
           </span>
           <div className="mt-2 flex flex-wrap gap-2">
             {profileEmojis.map((option) => (

@@ -54,12 +54,14 @@ export interface SessionState {
 export type ProfilePatch = Partial<{
   name: string;
   emoji: string;
+  photo: string | null;
   birthday: string | null;
   palette: string;
   stickers: Sticker[];
   loves: string[];
   dislikes: string[];
   plenty: string[];
+  wish: string;
   care: string;
 }>;
 

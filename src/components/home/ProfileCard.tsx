@@ -38,11 +38,12 @@ export function ProfileCard({ profile, isMe, onOpen }: ProfileCardProps) {
       ) : null}
 
       <div className="flex items-center gap-3">
-        <span
-          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border-[3px] border-ink bg-paper text-3xl"
-          aria-hidden
-        >
-          {profile.emoji}
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-[3px] border-ink bg-paper text-3xl">
+          {profile.photo ? (
+            <img src={profile.photo} alt={profile.name} className="h-full w-full object-cover" />
+          ) : (
+            <span aria-hidden>{profile.emoji}</span>
+          )}
         </span>
 
         <div className="min-w-0 flex-1">

@@ -1,6 +1,7 @@
 const meKey = "regalo.me";
 const mutedKey = "regalo.muted";
 const noticedKey = "regalo.noticed";
+const tutorialKey = "regalo.tutorial";
 
 const listeners = new Set<() => void>();
 
@@ -8,9 +9,10 @@ export interface Prefs {
   me: string | null;
   muted: boolean;
   noticed: string[];
+  tutorialSeen: boolean;
 }
 
-const serverValue: Prefs = { me: null, muted: false, noticed: [] };
+const serverValue: Prefs = { me: null, muted: false, noticed: [], tutorialSeen: true };
 
 let cached: Prefs = serverValue;
 let cachedRaw = "";
@@ -50,8 +52,9 @@ export function subscribePrefs(listener: () => void): () => void {
 export function prefsSnapshot(): Prefs {
   const me = read(meKey);
   const muted = read(mutedKey) === "1";
+  const tutorialSeen = read(tutorialKey) === "1";
   const noticedRaw = read(noticedKey) ?? "[]";
-  const raw = `${me ?? ""}|${muted ? "1" : "0"}|${noticedRaw}`;
+  const raw = `${me ?? ""}|${muted ? "1" : "0"}|${tutorialSeen ? "1" : "0"}|${noticedRaw}`;
 
   if (raw !== cachedRaw) {
     let noticed: string[] = [];
@@ -65,10 +68,14 @@ export function prefsSnapshot(): Prefs {
     }
 
     cachedRaw = raw;
-    cached = { me, muted, noticed };
+    cached = { me, muted, noticed, tutorialSeen };
   }
 
   return cached;
+}
+
+export function rememberTutorialSeen() {
+  write(tutorialKey, "1");
 }
 
 export function serverPrefsSnapshot(): Prefs {

@@ -162,6 +162,98 @@ textarea {
   to { transform: translateX(240%); }
 }
 
+@keyframes lid-lift {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  30% { transform: translate3d(0, 5px, 0) rotate(0deg); }
+  55% { transform: translate3d(-2px, -28px, 0) rotate(-7deg); }
+  75% { transform: translate3d(2px, -22px, 0) rotate(-4deg); }
+  100% { transform: translate3d(0, -26px, 0) rotate(-6deg); }
+}
+
+@keyframes bow-open {
+  0% { transform: scale(1) rotate(0deg); }
+  30% { transform: translate3d(0, 5px, 0) scale(1.06) rotate(0deg); }
+  55% { transform: translate3d(-2px, -30px, 0) scale(1.04) rotate(-7deg); }
+  75% { transform: translate3d(2px, -24px, 0) scale(1) rotate(-4deg); }
+  100% { transform: translate3d(0, -28px, 0) scale(1) rotate(-6deg); }
+}
+
+@keyframes gift-squish {
+  0%, 100% { transform: scale(1, 1); }
+  28% { transform: scale(1.06, 0.93); }
+  46% { transform: scale(0.97, 1.05); }
+  64% { transform: scale(1.02, 0.99); }
+}
+
+@keyframes pop-out {
+  0% { transform: translate3d(0, 10px, 0) scale(0.2); opacity: 0; }
+  45% { transform: translate3d(0, -34px, 0) scale(1.1); opacity: 1; }
+  100% { transform: translate3d(0, -64px, 0) scale(0.85); opacity: 0; }
+}
+
+@utility animate-gift-squish {
+  animation: gift-squish 1200ms var(--ease-swing) 420ms both;
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+
+@utility animate-pop-out {
+  animation: pop-out 1200ms var(--ease-snap) both;
+  will-change: transform, opacity;
+}
+
+@keyframes confetti-pop {
+  0% { transform: scale(0.2); opacity: 0; }
+  55% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.95; }
+}
+
+@keyframes halo-burst {
+  0% { transform: scale(0.65); opacity: 0.6; }
+  70% { transform: scale(1.5); opacity: 0; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes word-rise {
+  from { transform: translate3d(0, 110%, 0); opacity: 0; }
+  to { transform: translate3d(0, 0, 0); opacity: 1; }
+}
+
+@keyframes curtain-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.06); }
+}
+
+@utility animate-lid-lift {
+  animation: lid-lift 1100ms var(--ease-swing) 500ms both;
+  will-change: transform;
+}
+
+@utility animate-bow-open {
+  animation: bow-open 1100ms var(--ease-swing) 500ms both;
+  will-change: transform;
+}
+
+@utility animate-confetti-pop {
+  animation: confetti-pop 700ms var(--ease-swing) 900ms both;
+  will-change: transform, opacity;
+}
+
+@utility animate-halo-burst {
+  animation: halo-burst 1400ms ease-out 700ms infinite;
+  will-change: transform, opacity;
+}
+
+@utility animate-word-rise {
+  animation: word-rise 620ms var(--ease-snap) 260ms both;
+  will-change: transform, opacity;
+}
+
+@utility animate-curtain-out {
+  animation: curtain-out 560ms ease-in forwards;
+  will-change: transform, opacity;
+}
+
 @utility animate-candy-slide {
   animation: candy-slide 9s linear infinite;
   will-change: background-position;

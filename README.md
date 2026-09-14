@@ -1,6 +1,6 @@
 # 🎁 Regalo
 
-> A lista de presentes da turma, do jeitinho de cada um.
+> A lista de presentes do bibuaidi.
 
 **Regalo** é um app interno para os amigos guardarem tamanho, medida e preferência de presente num lugar só. Ninguém mais precisa perguntar "qual é o número do seu pé?" três dias antes do aniversário.
 
@@ -12,8 +12,11 @@ Cada pessoa tem o próprio espaço, e esse espaço é dela: escolhe a cor, a car
 
 | | |
 | --- | --- |
-| 👕 | Cada tamanho vira um desenho: toca no ícone da blusa e escreve o número embaixo |
+| 👕 | Cada item vira um desenho: toca no ícone da blusa e escreve o número embaixo |
 | ✍️ | O campo é livre — cabe `M`, `44`, `38/M`, `18 ou 19`, o que for |
+| 🍩 | Item sem medida (doce, livro, jogo) pergunta o gosto, não o número |
+| 📸 | Foto no perfil, opcional, encolhida no próprio aparelho antes de subir |
+| 💌 | Campo aberto de dica de presente, para o que não cabe em etiqueta |
 | ➕ | Botão de `+` para criar item que não está na lista, com nome e observação próprios |
 | 🏷️ | Item pode ficar marcado como **a confirmar** quando a pessoa não tem certeza |
 | 💝 | Listas de **ama ganhar**, **não curte** e **já tem demais**, todas editáveis |
@@ -21,6 +24,7 @@ Cada pessoa tem o próprio espaço, e esse espaço é dela: escolhe a cor, a car
 | 🎂 | Tracker de aniversário com contagem regressiva e aviso **15 dias antes** |
 | 🏆 | Nível e conquistas por perfil preenchido, para cutucar quem não respondeu |
 | 🔊 | Sons curtos ao escolher, guardar e comemorar, com botão de silêncio |
+| 🎬 | Abertura com o presente se abrindo e carrossel explicando o app na primeira visita |
 
 ## 🎂 Como funciona o aviso de aniversário
 
@@ -42,7 +46,7 @@ A lista tem medida de roupa de gente real, então o app não fica aberto na inte
 - **Next.js 16** (App Router) · **React 19** · **TypeScript** strict
 - **Tailwind CSS 4** — `@theme` e `@utility`, sem arquivo de config
 - **Supabase** (Postgres) para a lista compartilhada entre os celulares
-- **Vitest** nas regras de aniversário e de progresso
+- **Vitest** nas regras de aniversário e de medalhas (31 testes)
 - Ícones dos itens desenhados à mão em SVG, sem biblioteca
 
 ## 🚀 Rodando

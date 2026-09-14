@@ -7,7 +7,7 @@ import { Sheet } from "@/components/ui/Sheet";
 import { TextField } from "@/components/ui/TextField";
 import { copy } from "@/data/copy";
 import type { Palette } from "@/data/palettes";
-import { itemPresets } from "@/data/presets";
+import { itemPresets, kindFor } from "@/data/presets";
 import { sound } from "@/lib/sound";
 import type { ItemDraft, ProfileItem } from "@/types/profile";
 
@@ -36,6 +36,8 @@ export function ItemSheet({ item, palette, busy, onSave, onRemove, onClose }: It
     setPicking(false);
   };
 
+  const kind = kindFor(icon.length > 0 ? icon : "gift");
+
   const submit = () => {
     const cleanLabel = label.trim();
 
@@ -45,7 +47,7 @@ export function ItemSheet({ item, palette, busy, onSave, onRemove, onClose }: It
       return;
     }
 
-    if (value.trim().length === 0) {
+    if (kind === "size" && value.trim().length === 0) {
       setProblem(copy.errors.valueRequired);
 
       return;
@@ -96,7 +98,7 @@ export function ItemSheet({ item, palette, busy, onSave, onRemove, onClose }: It
   return (
     <Sheet
       title={item ? `Editar ${item.label}` : "Guardar no perfil"}
-      subtitle={copy.item.valueHint}
+      subtitle={kind === "size" ? copy.item.sizeHint : copy.item.tasteHint}
       accent={palette.soft}
       onClose={onClose}
       footer={
@@ -156,11 +158,11 @@ export function ItemSheet({ item, palette, busy, onSave, onRemove, onClose }: It
         />
 
         <TextField
-          label={copy.item.value}
+          label={kind === "size" ? copy.item.sizeValue : copy.item.tasteValue}
           value={value}
           maxLength={48}
-          placeholder="M, 44, 38/M, 17..."
-          autoCapitalize="characters"
+          placeholder={kind === "size" ? copy.item.sizePlaceholder : copy.item.tastePlaceholder}
+          autoCapitalize={kind === "size" ? "characters" : "sentences"}
           autoComplete="off"
           onChange={(event) => {
             setValue(event.target.value);

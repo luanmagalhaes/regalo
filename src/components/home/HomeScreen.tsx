@@ -22,6 +22,7 @@ interface HomeScreenProps {
   onToggleSound: () => void;
   onOpen: (profile: Profile) => void;
   onCreate: () => void;
+  onHelp: () => void;
 }
 
 export function HomeScreen({
@@ -35,6 +36,7 @@ export function HomeScreen({
   onToggleSound,
   onOpen,
   onCreate,
+  onHelp,
 }: HomeScreenProps) {
   const soon = sortByNextBirthday(profiles).filter((profile) => isNear(profile.birthday));
 
@@ -63,7 +65,17 @@ export function HomeScreen({
         </div>
         <p className="mt-1.5 text-sm font-semibold text-ink/65">{brand.tagline}</p>
 
-        <div className="mt-3 flex justify-center">
+        <div className="mt-3 flex justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              sound.tap();
+              onHelp();
+            }}
+            className="display rounded-full border-[3px] border-ink bg-paper px-3 py-1 text-xs text-ink transition-transform hover:-translate-y-[2px]"
+          >
+            ❓ Como funciona
+          </button>
           <button
             type="button"
             onClick={onToggleSound}

@@ -1,6 +1,35 @@
+export type ItemKind = "size" | "taste";
+
 export interface ItemPreset {
   icon: string;
   label: string;
+}
+
+const sizeIcons = new Set([
+  "shirt",
+  "dress",
+  "skirt",
+  "pants",
+  "shorts",
+  "bikini",
+  "swimsuit",
+  "panties",
+  "bra",
+  "pajamas",
+  "coat",
+  "hoodie",
+  "shoe",
+  "sneaker",
+  "sock",
+  "ring",
+  "earring",
+  "necklace",
+  "bracelet",
+  "cap",
+]);
+
+export function kindFor(icon: string): ItemKind {
+  return sizeIcons.has(icon) ? "size" : "taste";
 }
 
 export const itemPresets: readonly ItemPreset[] = [

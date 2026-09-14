@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { PhotoPicker } from "@/components/ui/PhotoPicker";
 import { Sheet } from "@/components/ui/Sheet";
 import { TextField } from "@/components/ui/TextField";
 import { copy } from "@/data/copy";
@@ -20,6 +21,7 @@ interface NewProfileSheetProps {
 export function NewProfileSheet({ busy, onCreate, onClose }: NewProfileSheetProps) {
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("🎁");
+  const [photo, setPhoto] = useState<string | null>(null);
   const [birthday, setBirthday] = useState("");
   const [palette, setPalette] = useState<PaletteKey>("morango");
   const [problem, setProblem] = useState<string | null>(null);
@@ -40,7 +42,13 @@ export function NewProfileSheet({ busy, onCreate, onClose }: NewProfileSheetProp
     }
 
     sound.party();
-    onCreate({ name: clean, emoji, birthday: birthday.length > 0 ? birthday : null, palette });
+    onCreate({
+      name: clean,
+      emoji,
+      photo,
+      birthday: birthday.length > 0 ? birthday : null,
+      palette,
+    });
   };
 
   return (
@@ -73,9 +81,16 @@ export function NewProfileSheet({ busy, onCreate, onClose }: NewProfileSheetProp
           }}
         />
 
+        <PhotoPicker
+          photo={photo}
+          emoji={emoji}
+          accent={paletteFor(palette).soft}
+          onPick={setPhoto}
+        />
+
         <div>
           <span className="display block text-xs uppercase tracking-[0.16em] text-ink/55">
-            Carinha
+            Carinha {photo ? "(aparece se não tiver foto)" : ""}
           </span>
           <div className="mt-2 flex flex-wrap gap-2">
             {profileEmojis.map((option) => (

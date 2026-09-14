@@ -1,6 +1,6 @@
 export const brand = {
   name: "Regalo",
-  tagline: "A lista de presentes da turma, do jeitinho de cada um.",
+  tagline: "A lista de presentes do bibuaidi.",
   ownerCall: "Esse é o seu espaço, edite como quiser.",
 } as const;
 
@@ -19,16 +19,22 @@ export const copy = {
     lovesTitle: "Ama ganhar",
     dislikesTitle: "Não curte",
     plentyTitle: "Já tem demais",
+    wishTitle: "Minha dica de presente",
+    wishHint: "Campo aberto: escreva o que quiser que a turma saiba antes de comprar.",
     careTitle: "Alergia ou restrição",
     careEmpty: "Nada declarado.",
-    stickersHint: "Arraste os adesivos para onde quiser.",
+    stickersHint: "Arraste os adesivos com o dedo. Toque em um para girar, aumentar ou tirar.",
     confirmDelete: "Apagar este perfil?",
     pendingTag: "confirmar",
   },
   item: {
     pick: "O que você quer guardar?",
-    value: "Qual é o seu número?",
-    valueHint: "Pode escrever do jeito que quiser: M, 44, 38/M, 17…",
+    sizeValue: "Qual é o seu número?",
+    sizeHint: "Escreva do jeito que quiser: M, 44, 38/M, 17…",
+    sizePlaceholder: "M, 44, 38/M, 17...",
+    tasteValue: "Como você gosta? (opcional)",
+    tasteHint: "Marca, sabor, estilo, cor — o que ajudar quem for comprar.",
+    tastePlaceholder: "amargo, terror, sem cheiro forte...",
     labelHint: "Nome do item",
     pendingLabel: "Ainda preciso confirmar esse",
     save: "Guardar",
