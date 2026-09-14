@@ -52,6 +52,45 @@ export function unlockSound() {
   }
 }
 
+let waiting: readonly Note[] | null = null;
+let waitingSince = 0;
+let listening = false;
+
+const waitingWindowMs = 12_000;
+
+function armFirstGesture() {
+  if (listening || typeof window === "undefined") {
+    return;
+  }
+
+  listening = true;
+
+  const wake = () => {
+    listening = false;
+    window.removeEventListener("pointerdown", wake);
+    window.removeEventListener("keydown", wake);
+
+    const pending = waiting;
+    const fresh = Date.now() - waitingSince < waitingWindowMs;
+
+    waiting = null;
+
+    const audio = contextFor();
+
+    if (!audio || !pending || !fresh) {
+      return;
+    }
+
+    void audio
+      .resume()
+      .then(() => schedule(audio, pending))
+      .catch(() => undefined);
+  };
+
+  window.addEventListener("pointerdown", wake, { once: true });
+  window.addEventListener("keydown", wake, { once: true });
+}
+
 function play(notes: readonly Note[]) {
   if (muted) {
     return;
@@ -64,9 +103,27 @@ function play(notes: readonly Note[]) {
   }
 
   if (audio.state === "suspended") {
-    void audio.resume().catch(() => undefined);
+    waiting = notes;
+    waitingSince = Date.now();
+    armFirstGesture();
+
+    void audio
+      .resume()
+      .then(() => {
+        if (waiting === notes) {
+          waiting = null;
+          schedule(audio, notes);
+        }
+      })
+      .catch(() => undefined);
+
+    return;
   }
 
+  schedule(audio, notes);
+}
+
+function schedule(audio: AudioContext, notes: readonly Note[]) {
   try {
     const start = audio.currentTime + 0.01;
 
