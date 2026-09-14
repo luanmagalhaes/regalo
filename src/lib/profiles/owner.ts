@@ -12,7 +12,12 @@ export interface OwnerClaims {
 const empty: OwnerClaims = { ids: [], master: false, exp: 0 };
 
 function secret(): string {
-  return process.env.REGALO_PASSPHRASE ?? process.env.SUPABASE_SECRET_KEY ?? "regalo-sem-segredo";
+  return (
+    process.env.REGALO_SECRET ??
+    process.env.REGALO_PASSPHRASE ??
+    process.env.SUPABASE_SECRET_KEY ??
+    "regalo-sem-segredo"
+  );
 }
 
 function encode(value: string): string {

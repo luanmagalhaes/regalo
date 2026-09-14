@@ -1,11 +1,11 @@
-import { assertUnlocked, handle, ownerClaims } from "@/app/api/_shared";
+import { assertMember, handle, ownerClaims } from "@/app/api/_shared";
 import { ServiceError, resetPin } from "@/lib/profiles/service";
 
 export const dynamic = "force-dynamic";
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   return handle(async () => {
-    await assertUnlocked();
+    await assertMember();
 
     const claims = await ownerClaims();
 

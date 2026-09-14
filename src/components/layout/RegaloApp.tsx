@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { GateScreen } from "@/components/layout/GateScreen";
+import { WelcomeScreen } from "@/components/layout/WelcomeScreen";
 import { HowItWorks } from "@/components/layout/HowItWorks";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { HomeScreen } from "@/components/home/HomeScreen";
@@ -148,8 +148,9 @@ export function RegaloApp() {
     return (
       <>
         {splash}
-        <GateScreen
-          onOpen={() => {
+        <WelcomeScreen
+          onIn={(profileId) => {
+            rememberMe(profileId);
             setGate("checking");
             void refresh();
           }}
@@ -173,7 +174,6 @@ export function RegaloApp() {
         {help}
         <ProfileScreen
         profile={open}
-        isMe={prefs.me === open.id}
         autoTour={!prefs.profileTourSeen}
         onTourDone={rememberProfileTourSeen}
         busy={busy}
@@ -293,7 +293,7 @@ export function RegaloApp() {
       {creating ? (
         <NewProfileSheet
           busy={busy}
-          onCreate={(draft: ProfileDraft) =>
+          onCreate={(draft) =>
             void run(
               () => api.createProfile(draft),
               ({ profile }) => {

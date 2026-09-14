@@ -62,13 +62,12 @@ const tourSteps: readonly TourStep[] = [
     target: "claim",
     emoji: "🙋",
     title: "Por último: esse sou eu",
-    body: "Se este perfil é o seu, toque aqui para o app te reconhecer. Depois disso o botão some e vira um aviso de que o espaço é seu.",
+    body: "Este espaço só aceita edição de quem tem o PIN dele. Se for o seu, toque aqui e digite seus 4 números; em perfil dos outros, tudo fica em modo leitura.",
   },
 ];
 
 interface ProfileScreenProps {
   profile: Profile;
-  isMe: boolean;
   canEdit: boolean;
   master: boolean;
   claiming: boolean;
@@ -89,7 +88,6 @@ interface ProfileScreenProps {
 
 export function ProfileScreen({
   profile,
-  isMe,
   canEdit,
   master,
   claiming,

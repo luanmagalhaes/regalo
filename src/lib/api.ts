@@ -57,8 +57,18 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export interface SessionState {
-  required: boolean;
-  unlocked: boolean;
+  member: boolean;
+  owned: string[];
+  master: boolean;
+}
+
+export interface RosterEntry {
+  id: string;
+  name: string;
+  emoji: string;
+  photo: string | null;
+  palette: string;
+  locked: boolean;
 }
 
 export type ProfilePatch = Partial<{
@@ -78,13 +88,9 @@ export type ProfilePatch = Partial<{
 export const api = {
   session: () => request<SessionState>("/api/session"),
 
-  unlock: (value: string) =>
-    request<SessionState>("/api/session", {
-      method: "POST",
-      body: JSON.stringify({ passphrase: value }),
-    }),
+  leave: () => request<SessionState>("/api/session", { method: "DELETE" }),
 
-  lock: () => request<SessionState>("/api/session", { method: "DELETE" }),
+  roster: () => request<{ roster: RosterEntry[] }>("/api/roster"),
 
   profiles: () =>
     request<{ profiles: Profile[]; owned: string[]; master: boolean }>("/api/profiles"),
@@ -101,7 +107,7 @@ export const api = {
   resetPin: (id: string) =>
     request<{ id: string }>(`/api/profiles/${id}/pin`, { method: "DELETE" }),
 
-  createProfile: (draft: ProfileDraft) =>
+  createProfile: (draft: ProfileDraft & { pin: string }) =>
     request<{ profile: Profile }>("/api/profiles", {
       method: "POST",
       body: JSON.stringify(draft),

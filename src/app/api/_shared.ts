@@ -1,4 +1,3 @@
-import { createHash, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { ServiceError } from "@/lib/profiles/service";
@@ -11,42 +10,15 @@ import {
   type OwnerClaims,
 } from "@/lib/profiles/owner";
 
-export const cookieName = "regalo_key";
-export const cookieMaxAge = 60 * 60 * 24 * 180;
+export async function isMember(): Promise<boolean> {
+  const claims = await ownerClaims();
 
-export function passphrase(): string | null {
-  const value = process.env.REGALO_PASSPHRASE;
-
-  return value && value.length > 0 ? value : null;
+  return claims.master || claims.ids.length > 0;
 }
 
-export function fingerprint(value: string): string {
-  return createHash("sha256").update(value).digest("hex");
-}
-
-export function matches(left: string, right: string): boolean {
-  const a = Buffer.from(left);
-  const b = Buffer.from(right);
-
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
-export async function isUnlocked(): Promise<boolean> {
-  const secret = passphrase();
-
-  if (!secret) {
-    return true;
-  }
-
-  const store = await cookies();
-  const token = store.get(cookieName)?.value;
-
-  return Boolean(token && matches(token, fingerprint(secret)));
-}
-
-export async function assertUnlocked() {
-  if (!(await isUnlocked())) {
-    throw new ServiceError("entre com a senha da turma", 401);
+export async function assertMember() {
+  if (!(await isMember())) {
+    throw new ServiceError("entre no seu espaço primeiro", 401);
   }
 }
 

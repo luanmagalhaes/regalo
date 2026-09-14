@@ -14,7 +14,7 @@ import type { PaletteKey, ProfileDraft } from "@/types/profile";
 
 interface NewProfileSheetProps {
   busy: boolean;
-  onCreate: (draft: ProfileDraft) => void;
+  onCreate: (draft: ProfileDraft & { pin: string }) => void;
   onClose: () => void;
 }
 
@@ -24,6 +24,7 @@ export function NewProfileSheet({ busy, onCreate, onClose }: NewProfileSheetProp
   const [photo, setPhoto] = useState<string | null>(null);
   const [birthday, setBirthday] = useState("");
   const [palette, setPalette] = useState<PaletteKey>("morango");
+  const [pin, setPin] = useState("");
   const [problem, setProblem] = useState<string | null>(null);
 
   const submit = () => {
@@ -41,8 +42,15 @@ export function NewProfileSheet({ busy, onCreate, onClose }: NewProfileSheetProp
       return;
     }
 
+    if (!/^\d{4}$/.test(pin)) {
+      setProblem("Crie um PIN de 4 números para o seu espaço.");
+
+      return;
+    }
+
     sound.party();
     onCreate({
+      pin,
       name: clean,
       emoji,
       photo,
@@ -139,6 +147,20 @@ export function NewProfileSheet({ busy, onCreate, onClose }: NewProfileSheetProp
             ))}
           </div>
         </div>
+
+        <TextField
+          label="Seu PIN de 4 números"
+          value={pin}
+          inputMode="numeric"
+          autoComplete="off"
+          maxLength={4}
+          placeholder="••••"
+          hint="Só quem souber esse PIN edita o seu espaço. Anote num canto."
+          onChange={(event) => {
+            setPin(event.target.value.replace(/\D/g, "").slice(0, 4));
+            setProblem(null);
+          }}
+        />
 
         <TextField
           label="Aniversário (opcional)"

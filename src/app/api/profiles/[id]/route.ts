@@ -1,11 +1,11 @@
-import { assertOwner, assertUnlocked, handle, readBody } from "@/app/api/_shared";
+import { assertOwner, assertMember, handle, readBody } from "@/app/api/_shared";
 import { deleteProfile, updateProfile } from "@/lib/profiles/service";
 
 export const dynamic = "force-dynamic";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   return handle(async () => {
-    await assertUnlocked();
+    await assertMember();
 
     const { id } = await params;
 
@@ -17,7 +17,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   return handle(async () => {
-    await assertUnlocked();
+    await assertMember();
 
     const { id } = await params;
 

@@ -36,8 +36,11 @@ O cálculo vive em funções puras, cobertas por teste, inclusive a virada de an
 
 A lista tem medida de roupa de gente real, então o app não fica aberto na internet:
 
-- entrada protegida por **senha da turma** (`REGALO_PASSPHRASE`), guardada num cookie `httpOnly`
-- todas as rotas de API conferem essa senha antes de responder
+- cada pessoa cria um **PIN de 4 números** atrelado ao id do perfil; o PIN é guardado com `scrypt` e salt próprio, nunca em texto
+- o crachá de dono é um cookie `httpOnly` assinado com HMAC — só quem tem o PIN edita aquele perfil
+- a lista completa só responde para quem já entrou em algum perfil; sem isso, a API devolve 401
+- cinco erros de PIN bloqueiam aquele perfil por um minuto
+- senha mestre (`REGALO_MASTER_PIN`) libera qualquer perfil, para quando alguém esquecer o PIN
 - `robots: noindex` — a página não entra em buscador
 - RLS ligada nas duas tabelas e **nenhuma policy**: o banco só responde à chave secreta, que nunca sai do servidor
 
@@ -67,7 +70,8 @@ Variáveis de ambiente:
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | endereço do projeto Supabase |
 | `SUPABASE_SECRET_KEY` | chave secreta, usada só no servidor |
-| `REGALO_PASSPHRASE` | senha combinada no grupo; sem ela, o app abre sem trava |
+| `REGALO_MASTER_PIN` | senha mestre de 4 números, libera qualquer perfil |
+| `REGALO_SECRET` | segredo que assina o crachá de dono (opcional; cai para a chave do Supabase) |
 
 As migrations ficam em `supabase/migrations` e são aplicadas na ordem do nome.
 

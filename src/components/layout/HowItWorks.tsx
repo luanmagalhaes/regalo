@@ -38,6 +38,12 @@ const slides: readonly Slide[] = [
     art: "cake",
   },
   {
+    emoji: "🔒",
+    title: "Seu PIN, seu espaço",
+    body: "Cada um tem um PIN de 4 números. Com ele você edita o seu espaço em qualquer celular; sem ele, o perfil dos outros aparece só para leitura.",
+    art: "profile",
+  },
+  {
     emoji: "🏆",
     title: "Medalhas",
     body: "Cada parte preenchida acende uma medalha e sobe o nível do perfil. É só para cutucar quem ainda não respondeu.",

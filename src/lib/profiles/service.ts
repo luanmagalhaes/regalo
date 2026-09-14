@@ -235,9 +235,43 @@ async function assertNameFree(name: string, exceptId?: string) {
   }
 }
 
+export interface RosterEntry {
+  id: string;
+  name: string;
+  emoji: string;
+  photo: string | null;
+  palette: PaletteKey;
+  locked: boolean;
+}
+
+export async function listRoster(): Promise<RosterEntry[]> {
+  const db = serverClient();
+  const { data, error } = await db
+    .from("profiles")
+    .select("id, name, emoji, photo, palette, pin_hash")
+    .order("position", { ascending: true });
+
+  if (error) {
+    fail("falha ao listar a turma", error);
+  }
+
+  return (data as ProfileRow[]).map((row) => ({
+    id: row.id,
+    name: row.name,
+    emoji: row.emoji,
+    photo: row.photo,
+    palette: (row.palette in palettes ? row.palette : "morango") as PaletteKey,
+    locked: Boolean(row.pin_hash),
+  }));
+}
+
 export async function createProfile(body: unknown): Promise<Profile> {
   const input = (body ?? {}) as Record<string, unknown>;
   const name = text(input.name, "o nome", maxNameLength);
+
+  if (!isPinShaped(input.pin)) {
+    throw new ServiceError("crie um PIN de 4 números para o seu espaço", 422);
+  }
   const emoji = text(input.emoji ?? "🎁", "o emoji", 8);
   const palette = paletteKey(input.palette ?? "morango");
   const birthday = birthdayValue(input.birthday ?? null);
@@ -260,7 +294,15 @@ export async function createProfile(body: unknown): Promise<Profile> {
 
   const { data, error } = await db
     .from("profiles")
-    .insert({ name, emoji, palette, birthday, photo, position: count ?? 0 })
+    .insert({
+      name,
+      emoji,
+      palette,
+      birthday,
+      photo,
+      pin_hash: hashPin(input.pin as string),
+      position: count ?? 0,
+    })
     .select("*")
     .single();
 
