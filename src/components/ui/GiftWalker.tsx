@@ -8,7 +8,7 @@ export function GiftWalker({ className = "w-20", idPrefix = "walker" }: GiftWalk
 
   return (
     <svg
-      viewBox="0 0 150 190"
+      viewBox="0 -10 150 200"
       className={`animate-walk-bob ${className}`}
       role="img"
       aria-label="Presente andando com um presentinho na mão"
@@ -50,7 +50,7 @@ export function GiftWalker({ className = "w-20", idPrefix = "walker" }: GiftWalk
           <rect x="28" y="24" width="92" height="20" rx="7" fill="none" />
         </g>
 
-        <g>
+        <g transform="translate(74 24) scale(0.9) translate(-74 -24)">
           <path d="M74 24c-16 0-28-5-28-15 0-7 6-11 12-9 7 2 13 13 16 24z" fill="#ffd964" />
           <path d="M74 24c16 0 28-5 28-15 0-7-6-11-12-9-7 2-13 13-16 24z" fill="#ffd964" />
           <circle cx="74" cy="21" r="7" fill="#f7cf4a" />
