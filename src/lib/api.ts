@@ -1,6 +1,16 @@
 import { messageForStatus, networkMessage, unreadableMessage } from "@/lib/messages";
 import type { ItemDraft, Profile, ProfileDraft, ProfileItem, Sticker } from "@/types/profile";
 
+export function humanize(message: string): string {
+  const clean = message.trim();
+
+  if (clean.length === 0) {
+    return clean;
+  }
+
+  return clean[0].toUpperCase() + clean.slice(1);
+}
+
 export class ApiError extends Error {
   readonly status: number;
 
@@ -36,7 +46,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!response.ok) {
     const given = (payload as { error?: string } | null)?.error;
 
-    throw new ApiError(given ?? messageForStatus(response.status), response.status);
+    throw new ApiError(humanize(given ?? messageForStatus(response.status)), response.status);
   }
 
   if (payload === null) {
