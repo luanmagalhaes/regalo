@@ -53,11 +53,10 @@ export function GiftArt({ className = "w-24", animated = false, idPrefix = "gift
         </g>
 
         <g>
-          <rect x="68" y="136" width="84" height="14" rx="5" fill="#ffffff" />
-          <path
-            d="M68 150h84v22c0 5-3 9-8 9h-13c-4 0-6-4-6-9 0-10-7-16-17-16s-17 6-17 16c0 5-2 9-6 9H76c-5 0-8-4-8-9z"
-            fill="#ffffff"
-          />
+          <path d="M46 140h128v36c0 8-6 14-14 14H60c-8 0-14-6-14-14z" fill="#ffffff" />
+          <path d="M52 161h33l13 29H60c-5 0-8-4-8-9z" fill="#f7cf4a" strokeWidth="5" />
+          <path d="M168 161h-33l-13 29h38c5 0 8-4 8-9z" fill="#f7cf4a" strokeWidth="5" />
+          <path d="M46 158h128" fill="none" strokeWidth="5" />
         </g>
 
         <g className={animated ? "animate-lid-lift" : ""}>
