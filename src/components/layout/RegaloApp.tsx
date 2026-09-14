@@ -21,12 +21,14 @@ import {
   subscribePrefs,
 } from "@/lib/prefs";
 import { applyMuted, sound, unlockSound } from "@/lib/sound";
+import { PushInvite } from "@/components/layout/PushInvite";
 import {
-  askPushPermission,
   pushSnapshot,
+  pushSupported,
+  refreshPush,
   serverPushSnapshot,
   subscribePush,
-} from "@/lib/push";
+} from "@/lib/push/client";
 import type { ItemDraft, Profile, ProfileDraft } from "@/types/profile";
 
 export function RegaloApp() {
@@ -48,11 +50,14 @@ export function RegaloApp() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [busy, setBusy] = useState(false);
-  const push = useSyncExternalStore(subscribePush, pushSnapshot, serverPushSnapshot);
+  const permission = useSyncExternalStore(subscribePush, pushSnapshot, serverPushSnapshot);
   const [splashDone, setSplashDone] = useState(false);
   const [askedHelp, setAskedHelp] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [claimProblem, setClaimProblem] = useState<string | null>(null);
+  const [tourFor, setTourFor] = useState<string | null>(null);
+  const [pushAsked, setPushAsked] = useState(false);
+  const push = pushAsked ? "asked" : permission;
   const noticedRef = useRef<string[]>([]);
 
   useEffect(() => {
@@ -72,38 +77,10 @@ export function RegaloApp() {
   }, []);
 
   useEffect(() => {
-    if (pushSnapshot() !== "granted") {
-      return;
-    }
+    const settle = window.setTimeout(() => void refreshPush(), 1200);
 
-    const year = new Date().getFullYear();
-    const fresh = profiles.filter(
-      (profile) => isNear(profile.birthday) && !noticedRef.current.includes(`${profile.id}:${year}`),
-    );
-
-    if (fresh.length === 0) {
-      return;
-    }
-
-    for (const profile of fresh) {
-      try {
-        const distance = daysUntilBirthday(profile.birthday);
-
-        new Notification("Regalo", {
-          body: `${profile.name} faz aniversário ${countdownLabel(distance).toLowerCase()}. Dá uma olhada na lista.`,
-          icon: "/icon-192.png",
-          tag: `regalo-${profile.id}-${year}`,
-        });
-      } catch {
-        break;
-      }
-    }
-
-    const tokens = [...noticedRef.current, ...fresh.map((profile) => `${profile.id}:${year}`)];
-
-    noticedRef.current = tokens;
-    rememberNoticed(tokens);
-  }, [profiles]);
+    return () => window.clearTimeout(settle);
+  }, [profiles.length]);
 
   const run = useCallback(
     async <T,>(action: () => Promise<T>, after?: (result: T) => void) => {
@@ -125,13 +102,7 @@ export function RegaloApp() {
     [refresh, setError],
   );
 
-  const askPush = useCallback(() => {
-    void askPushPermission().then((answer) => {
-      if (answer === "granted") {
-        sound.party();
-      }
-    });
-  }, []);
+
 
   const splash = splashDone ? null : <SplashScreen onDone={() => setSplashDone(true)} />;
   const helpOpen = splashDone && (askedHelp || !prefs.tutorialSeen);
@@ -151,6 +122,8 @@ export function RegaloApp() {
         <WelcomeScreen
           onIn={(profileId) => {
             rememberMe(profileId);
+            setOpenId(profileId);
+            setTourFor(profileId);
             setGate("checking");
             void refresh();
           }}
@@ -173,9 +146,13 @@ export function RegaloApp() {
         {splash}
         {help}
         <ProfileScreen
+        key={tourFor === open.id ? `${open.id}-tour` : open.id}
         profile={open}
-        autoTour={!prefs.profileTourSeen}
-        onTourDone={rememberProfileTourSeen}
+        autoTour={tourFor === open.id || !prefs.profileTourSeen}
+        onTourDone={() => {
+          setTourFor(null);
+          rememberProfileTourSeen();
+        }}
         busy={busy}
         error={error}
         onBack={() => {
@@ -197,6 +174,7 @@ export function RegaloApp() {
 
               if (result.outcome !== "master") {
                 rememberMe(open.id);
+                setTourFor(open.id);
               }
 
               return refresh();
@@ -264,18 +242,19 @@ export function RegaloApp() {
     );
   }
 
+  const inviting = splashDone && !helpOpen && push === "default" && pushSupported();
+
   return (
     <>
       {splash}
       {help}
+      {inviting ? <PushInvite onDone={() => setPushAsked(true)} /> : null}
       <HomeScreen
         profiles={profiles}
         meId={prefs.me}
         loading={loading}
         error={error}
         muted={prefs.muted}
-        canAskPush={push === "default"}
-        onAskPush={askPush}
         onToggleSound={() => {
           applyMuted(!prefs.muted);
           rememberMuted(!prefs.muted);

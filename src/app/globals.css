@@ -178,6 +178,55 @@ textarea {
   100% { transform: translate3d(0, -28px, 0) scale(1) rotate(-6deg); }
 }
 
+@keyframes walk-bob {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-1deg); }
+  50% { transform: translate3d(0, -5px, 0) rotate(1deg); }
+}
+
+@keyframes leg-front {
+  0%, 100% { transform: rotate(16deg); }
+  50% { transform: rotate(-16deg); }
+}
+
+@keyframes leg-back {
+  0%, 100% { transform: rotate(-16deg); }
+  50% { transform: rotate(16deg); }
+}
+
+@keyframes parcel-sway {
+  0%, 100% { transform: rotate(-7deg); }
+  50% { transform: rotate(7deg); }
+}
+
+@keyframes trail-march {
+  from { background-position-x: 0; }
+  to { background-position-x: -36px; }
+}
+
+@utility animate-walk-bob {
+  animation: walk-bob 620ms ease-in-out infinite;
+  will-change: transform;
+}
+
+@utility animate-leg-front {
+  animation: leg-front 620ms ease-in-out infinite;
+  will-change: transform;
+}
+
+@utility animate-leg-back {
+  animation: leg-back 620ms ease-in-out infinite;
+  will-change: transform;
+}
+
+@utility animate-parcel-sway {
+  animation: parcel-sway 620ms ease-in-out infinite;
+  will-change: transform;
+}
+
+@utility animate-trail-march {
+  animation: trail-march 900ms linear infinite;
+}
+
 @keyframes gift-squish {
   0%, 100% { transform: scale(1, 1); }
   28% { transform: scale(1.06, 0.93); }

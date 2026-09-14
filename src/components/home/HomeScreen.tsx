@@ -1,13 +1,11 @@
 "use client";
 
-import { BirthdayBanner } from "@/components/home/BirthdayBanner";
-import { BirthdayTracker } from "@/components/home/BirthdayTracker";
+import { BirthdayTrail } from "@/components/home/BirthdayTrail";
 import { ProfileCard } from "@/components/home/ProfileCard";
 import { Button } from "@/components/ui/Button";
 import { Screen } from "@/components/ui/Screen";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { brand, copy } from "@/data/copy";
-import { isNear, sortByNextBirthday } from "@/lib/birthday";
 import { sound } from "@/lib/sound";
 import type { Profile } from "@/types/profile";
 
@@ -17,8 +15,6 @@ interface HomeScreenProps {
   loading: boolean;
   error: string | null;
   muted: boolean;
-  canAskPush: boolean;
-  onAskPush: () => void;
   onToggleSound: () => void;
   onOpen: (profile: Profile) => void;
   onCreate: () => void;
@@ -31,15 +27,11 @@ export function HomeScreen({
   loading,
   error,
   muted,
-  canAskPush,
-  onAskPush,
   onToggleSound,
   onOpen,
   onCreate,
   onHelp,
 }: HomeScreenProps) {
-  const soon = sortByNextBirthday(profiles).filter((profile) => isNear(profile.birthday));
-
   return (
     <Screen
       wide
@@ -88,14 +80,7 @@ export function HomeScreen({
       </header>
 
       <div className="flex flex-col gap-4 pb-4">
-        {soon.length > 0 ? (
-          <BirthdayBanner
-            profiles={soon}
-            canAskPush={canAskPush}
-            onAskPush={onAskPush}
-            onOpen={onOpen}
-          />
-        ) : null}
+        {profiles.length > 0 ? <BirthdayTrail profiles={profiles} onOpen={onOpen} /> : null}
 
         {error ? (
           <p className="rounded-2xl border-[3px] border-ink bg-morango px-3 py-2 text-sm font-semibold text-paper">
@@ -138,7 +123,6 @@ export function HomeScreen({
           </div>
         </section>
 
-        {profiles.length > 0 ? <BirthdayTracker profiles={profiles} onOpen={onOpen} /> : null}
       </div>
     </Screen>
   );
