@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { NewProfileSheet } from "@/components/home/NewProfileSheet";
 import { PinSheet } from "@/components/profile/PinSheet";
 import { Button } from "@/components/ui/Button";
+import { GiftArt } from "@/components/ui/GiftArt";
 import { Screen } from "@/components/ui/Screen";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { brand } from "@/data/copy";
@@ -102,9 +103,7 @@ export function WelcomeScreen({ onIn }: WelcomeScreenProps) {
 
       <div className="flex flex-col gap-3 pb-4">
         <div className="scoop-sm rounded-3xl border-[3px] border-ink bg-paper p-4 text-center">
-          <span className="animate-float-soft block text-4xl" aria-hidden>
-            👋
-          </span>
+          <GiftArt idPrefix="welcome" className="animate-float-soft mx-auto w-24" />
           <h2 className="display mt-1 text-xl text-ink">Quem é você?</h2>
           <p className="mt-1 text-sm text-ink/65">
             Toque no seu nome e crie um PIN de 4 números. Ele é seu: ninguém mexe no seu espaço sem

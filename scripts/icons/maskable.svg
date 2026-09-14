@@ -6,24 +6,29 @@
       <stop offset="0.7" stop-color="#dbe0ff"/>
       <stop offset="1" stop-color="#d6f4e3"/>
     </linearGradient>
-    <linearGradient id="box" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ff8ab8"/>
-      <stop offset="1" stop-color="#ff5f9c"/>
-    </linearGradient>
+    <pattern id="dots" width="52" height="52" patternUnits="userSpaceOnUse">
+      <circle cx="14" cy="14" r="8" fill="#241830"/>
+      <circle cx="40" cy="38" r="6" fill="#241830"/>
+    </pattern>
   </defs>
 
   <rect width="512" height="512" fill="url(#candy)"/>
 
   <g transform="translate(256 256) scale(0.72) translate(-256 -256)">
     <g stroke="#3b2450" stroke-width="16" stroke-linejoin="round" stroke-linecap="round">
-      <rect x="98" y="212" width="316" height="72" rx="20" fill="#f5cf6a"/>
-      <rect x="126" y="284" width="260" height="146" rx="22" fill="url(#box)"/>
-      <path d="M256 212v218" fill="none"/>
-      <path d="M256 212c-54 0-96-14-96-48 0-24 20-38 40-32 24 7 44 44 56 80zM256 212c54 0 96-14 96-48 0-24-20-38-40-32-24 7-44 44-56 80z" fill="#7fd9a6"/>
-    </g>
-    <g fill="#3b2450" opacity="0.9">
-      <circle cx="200" cy="356" r="9"/>
-      <circle cx="312" cy="356" r="9"/>
+      <rect x="126" y="284" width="260" height="146" rx="22" fill="#f7cf4a"/>
+      <rect x="126" y="284" width="260" height="146" rx="22" fill="url(#dots)" stroke="none"/>
+      <rect x="126" y="284" width="260" height="146" rx="22" fill="none"/>
+
+      <rect x="158" y="332" width="196" height="32" rx="10" fill="#ffffff"/>
+      <path d="M158 364h196v50c0 11-7 18-18 18h-30c-9 0-14-8-14-20 0-22-16-36-36-36s-36 14-36 36c0 12-5 20-14 20h-30c-11 0-18-7-18-18z" fill="#ffffff"/>
+
+      <rect x="98" y="212" width="316" height="72" rx="20" fill="#ffd964"/>
+      <rect x="98" y="212" width="316" height="72" rx="20" fill="url(#dots)" stroke="none"/>
+      <rect x="98" y="212" width="316" height="72" rx="20" fill="none"/>
+
+      <path d="M256 212c-54 0-96-14-96-48 0-24 20-38 40-32 24 7 44 44 56 80zM256 212c54 0 96-14 96-48 0-24-20-38-40-32-24 7-44 44-56 80z" fill="#ffd964"/>
+      <circle cx="256" cy="204" r="24" fill="#f7cf4a"/>
     </g>
   </g>
 </svg>

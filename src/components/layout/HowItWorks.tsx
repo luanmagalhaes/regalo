@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { CartoonIcon } from "@/components/ui/CartoonIcon";
+import { GiftArt } from "@/components/ui/GiftArt";
 import { sound } from "@/lib/sound";
 
 interface Slide {
@@ -69,9 +70,13 @@ export function HowItWorks({ onClose }: HowItWorksProps) {
     <div className="fixed inset-0 z-[80] flex items-end justify-center bg-ink/70 p-0 sm:items-center sm:p-4">
       <div className="animate-sheet-up flex max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-[2rem] border-[3px] border-ink bg-paper shadow-[0_-8px_0_var(--color-ink)] sm:rounded-[2rem] sm:shadow-[0_10px_0_var(--color-ink)]">
         <div className="sprinkles relative shrink-0 bg-morango-soft px-5 py-6 text-center">
-          <span className="animate-float-soft relative block text-6xl" aria-hidden>
-            {slide.emoji}
-          </span>
+          {index === 0 ? (
+            <GiftArt idPrefix="tour" className="animate-float-soft relative mx-auto w-28" />
+          ) : (
+            <span className="animate-float-soft relative block text-6xl" aria-hidden>
+              {slide.emoji}
+            </span>
+          )}
           <h2 className="display relative mt-2 text-2xl leading-tight text-ink">{slide.title}</h2>
         </div>
 
