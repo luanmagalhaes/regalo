@@ -49,7 +49,7 @@ export async function sendBirthdayNotices(now = new Date()): Promise<NoticeResul
   const [people, subscriptions, notices] = await Promise.all([
     db.from("profiles").select("id, name, emoji, birthday"),
     db.from("push_subscriptions").select("id, endpoint, p256dh, auth"),
-    db.from("birthday_notices").select("target_id, year"),
+    db.from("birthday_notices").select("target_id, year, endpoint"),
   ]);
 
   if (people.error || subscriptions.error || notices.error) {
@@ -58,8 +58,8 @@ export async function sendBirthdayNotices(now = new Date()): Promise<NoticeResul
 
   const year = now.getFullYear();
   const already = new Set(
-    (notices.data as { target_id: string; year: number }[]).map(
-      (row) => `${row.target_id}:${row.year}`,
+    (notices.data as { target_id: string; year: number; endpoint: string }[]).map(
+      (row) => `${row.target_id}:${row.year}:${row.endpoint}`,
     ),
   );
 
@@ -69,13 +69,12 @@ export async function sendBirthdayNotices(now = new Date()): Promise<NoticeResul
     return distance !== null && distance <= nearWindow;
   });
 
-  const fresh = soon.filter((person) => !already.has(`${person.id}:${year}`));
   const rows = subscriptions.data as SubscriptionRow[];
 
   let sent = 0;
   let dropped = 0;
 
-  for (const person of fresh) {
+  for (const person of soon) {
     const distance = daysUntilBirthday(person.birthday, now) ?? 0;
     const payload = JSON.stringify({
       title: distance === 0 ? `Hoje é aniversário de ${person.name}! 🎂` : "Regalo 🎁",
@@ -87,12 +86,19 @@ export async function sendBirthdayNotices(now = new Date()): Promise<NoticeResul
     });
 
     for (const row of rows) {
+      if (already.has(`${person.id}:${year}:${row.endpoint}`)) {
+        continue;
+      }
+
       try {
         await webpush.sendNotification(
           { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } },
           payload,
         );
         sent += 1;
+        await db
+          .from("birthday_notices")
+          .upsert({ target_id: person.id, year, endpoint: row.endpoint });
       } catch (cause) {
         const status = (cause as { statusCode?: number }).statusCode;
 
@@ -105,7 +111,6 @@ export async function sendBirthdayNotices(now = new Date()): Promise<NoticeResul
       }
     }
 
-    await db.from("birthday_notices").upsert({ target_id: person.id, year });
   }
 
   return {
@@ -113,6 +118,10 @@ export async function sendBirthdayNotices(now = new Date()): Promise<NoticeResul
     soon: soon.map((person) => person.name),
     sent,
     dropped,
-    skipped: soon.filter((person) => already.has(`${person.id}:${year}`)).map((p) => p.name),
+    skipped: soon
+      .filter((person) =>
+        rows.every((row) => already.has(`${person.id}:${year}:${row.endpoint}`)),
+      )
+      .map((person) => person.name),
   };
 }
