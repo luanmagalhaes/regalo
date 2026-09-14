@@ -15,6 +15,7 @@ import {
   rememberMe,
   rememberMuted,
   rememberNoticed,
+  rememberProfileTourSeen,
   rememberTutorialSeen,
   serverPrefsSnapshot,
   subscribePrefs,
@@ -159,6 +160,8 @@ export function RegaloApp() {
         <ProfileScreen
         profile={open}
         isMe={prefs.me === open.id}
+        autoTour={!prefs.profileTourSeen}
+        onTourDone={rememberProfileTourSeen}
         busy={busy}
         error={error}
         onBack={() => {

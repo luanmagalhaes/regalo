@@ -9,6 +9,7 @@ import { StickerLayer } from "@/components/profile/StickerLayer";
 import { StickerPicker } from "@/components/profile/StickerPicker";
 import { Button } from "@/components/ui/Button";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { GuidedTour, type TourStep } from "@/components/layout/GuidedTour";
 import { Screen } from "@/components/ui/Screen";
 import { TagEditor } from "@/components/ui/TagEditor";
 import { brand, copy } from "@/data/copy";
@@ -19,9 +20,56 @@ import { sound } from "@/lib/sound";
 import type { ProfilePatch } from "@/lib/api";
 import type { ItemDraft, Profile, ProfileItem, Sticker } from "@/types/profile";
 
+const tourSteps: readonly TourStep[] = [
+  {
+    target: "header",
+    emoji: "🏠",
+    title: "O espaço da pessoa",
+    body: "Foto, carinha, aniversário e o nível do perfil. Tudo aqui pode ser trocado por quem quiser deixar do seu jeito.",
+  },
+  {
+    target: "customize",
+    emoji: "🎨",
+    title: "Cor e adesivos",
+    body: "Ajustar perfil troca nome, foto, cor e data. Colar adesivo solta um emoji na tela — depois é só arrastar com o dedo.",
+  },
+  {
+    target: "wish",
+    emoji: "💌",
+    title: "Dica de presente",
+    body: "Campo aberto para escrever o que quiser. Não tem botão de salvar: o texto guarda sozinho quando você toca fora dele.",
+  },
+  {
+    target: "items",
+    emoji: "👕",
+    title: "Tamanhos e itens",
+    body: "Cada desenho é um item. Toque em um para editar ou apagar. Roupa e calçado pedem o número; doce e livro pedem só o gosto.",
+  },
+  {
+    target: "tags",
+    emoji: "💝",
+    title: "Ama, não curte, já tem demais",
+    body: "Escreva e toque no + para guardar cada etiqueta. Elas entram na hora, uma a uma.",
+  },
+  {
+    target: "add",
+    emoji: "➕",
+    title: "Guardar um item novo",
+    body: "Esse botão abre a lista de desenhos. Escolhe o desenho, escreve o número e confirma.",
+  },
+  {
+    target: "claim",
+    emoji: "🙋",
+    title: "Por último: esse sou eu",
+    body: "Se este perfil é o seu, toque aqui para o app te reconhecer. Depois disso o botão some e vira um aviso de que o espaço é seu.",
+  },
+];
+
 interface ProfileScreenProps {
   profile: Profile;
   isMe: boolean;
+  autoTour: boolean;
+  onTourDone: () => void;
   busy: boolean;
   error: string | null;
   onBack: () => void;
@@ -36,6 +84,8 @@ interface ProfileScreenProps {
 export function ProfileScreen({
   profile,
   isMe,
+  autoTour,
+  onTourDone,
   busy,
   error,
   onBack,
@@ -59,6 +109,7 @@ export function ProfileScreen({
   const [confirmingProfile, setConfirmingProfile] = useState(false);
   const [confirmingItem, setConfirmingItem] = useState<ProfileItem | null>(null);
   const [localStickers, setLocalStickers] = useState<Sticker[] | null>(null);
+  const [touring, setTouring] = useState(autoTour);
 
   const stickers = localStickers ?? profile.stickers;
 
@@ -94,6 +145,7 @@ export function ProfileScreen({
             <Button variant="paper" size="lg" onClick={onBack}>
               ← Turma
             </Button>
+            <span data-tour="add" className="flex-1">
             <Button
               variant="candy"
               size="lg"
@@ -106,36 +158,52 @@ export function ProfileScreen({
             >
               + Guardar um item
             </Button>
+            </span>
           </div>
 
-          {isMe ? (
-            <p className="display text-center text-xs text-ink/55">
-              ✓ Esse perfil é o seu. {brand.ownerCall}
-            </p>
-          ) : (
-            <Button
-              variant="mint"
-              size="md"
-              fullWidth
-              onClick={() => {
-                sound.party();
-                onClaim();
-              }}
-            >
-              🙋 Esse sou eu
-            </Button>
-          )}
+          <div data-tour="claim">
+            {isMe ? (
+              <p className="display text-center text-xs text-ink/55">
+                ✓ Esse perfil é o seu. {brand.ownerCall}
+              </p>
+            ) : (
+              <Button
+                variant="mint"
+                size="md"
+                fullWidth
+                onClick={() => {
+                  sound.party();
+                  onClaim();
+                }}
+              >
+                🙋 Esse sou eu
+              </Button>
+            )}
+          </div>
         </div>
       }
     >
       <div className="flex flex-col gap-4 pb-4">
-        <div className="flex justify-center">
+        <div className="flex items-center justify-center gap-2">
           <span className="display rounded-full border-[3px] border-ink bg-paper px-3 py-1.5 text-center text-xs text-ink">
             {isMe ? brand.ownerCall : `Espaço de ${profile.name}`}
           </span>
+          <button
+            type="button"
+            onClick={() => {
+              sound.tap();
+              setTouring(true);
+            }}
+            className="display shrink-0 rounded-full border-[3px] border-ink bg-baunilha px-2.5 py-1.5 text-xs text-ink transition-transform hover:-translate-y-[2px]"
+          >
+            ❓ Me guia
+          </button>
         </div>
 
-        <section className="scoop relative overflow-hidden rounded-[1.75rem] border-[3px] border-ink bg-paper p-5">
+        <section
+          data-tour="header"
+          className="scoop relative overflow-hidden rounded-[1.75rem] border-[3px] border-ink bg-paper p-5"
+        >
           <div className="sprinkles pointer-events-none absolute inset-0" aria-hidden />
 
           <div className="relative flex flex-col items-center gap-2 text-center">
@@ -167,7 +235,7 @@ export function ProfileScreen({
             </div>
           </div>
 
-          <div className="relative mt-4 flex flex-wrap justify-center gap-2">
+          <div data-tour="customize" className="relative mt-4 flex flex-wrap justify-center gap-2">
             <button
               type="button"
               onClick={() => {
@@ -203,7 +271,7 @@ export function ProfileScreen({
           </p>
         ) : null}
 
-        <section className="scoop-sm rounded-3xl border-[3px] border-ink bg-paper p-4">
+        <section data-tour="wish" className="scoop-sm rounded-3xl border-[3px] border-ink bg-paper p-4">
           <div className="flex items-center gap-2">
             <span aria-hidden className="text-xl">
               💌
@@ -232,7 +300,7 @@ export function ProfileScreen({
           />
         </section>
 
-        <section>
+        <section data-tour="items">
           <div className="mb-2 flex items-baseline justify-between">
             <h2 className="display text-lg text-ink">{copy.profile.itemsTitle}</h2>
             <span className="text-xs font-semibold uppercase tracking-wider text-ink/45">
@@ -274,6 +342,7 @@ export function ProfileScreen({
           ) : null}
         </section>
 
+        <div data-tour="tags" className="flex flex-col gap-4">
         <TagEditor
           title={copy.profile.lovesTitle}
           emoji="💝"
@@ -303,6 +372,7 @@ export function ProfileScreen({
           busy={busy}
           onChange={(plenty) => onPatch({ plenty })}
         />
+        </div>
 
         <section className="scoop-sm rounded-3xl border-[3px] border-ink bg-paper p-4">
           <div className="flex items-center gap-2">
@@ -335,6 +405,16 @@ export function ProfileScreen({
           <BadgeShelf progress={progress} palette={palette} />
         </section>
       </div>
+
+      {touring ? (
+        <GuidedTour
+          steps={tourSteps}
+          onClose={() => {
+            setTouring(false);
+            onTourDone();
+          }}
+        />
+      ) : null}
 
       {pickingSticker ? (
         <StickerPicker

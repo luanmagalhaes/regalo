@@ -2,6 +2,7 @@ const meKey = "regalo.me";
 const mutedKey = "regalo.muted";
 const noticedKey = "regalo.noticed";
 const tutorialKey = "regalo.tutorial";
+const profileTourKey = "regalo.profiletour";
 
 const listeners = new Set<() => void>();
 
@@ -10,9 +11,16 @@ export interface Prefs {
   muted: boolean;
   noticed: string[];
   tutorialSeen: boolean;
+  profileTourSeen: boolean;
 }
 
-const serverValue: Prefs = { me: null, muted: false, noticed: [], tutorialSeen: true };
+const serverValue: Prefs = {
+  me: null,
+  muted: false,
+  noticed: [],
+  tutorialSeen: true,
+  profileTourSeen: true,
+};
 
 let cached: Prefs = serverValue;
 let cachedRaw = "";
@@ -53,8 +61,9 @@ export function prefsSnapshot(): Prefs {
   const me = read(meKey);
   const muted = read(mutedKey) === "1";
   const tutorialSeen = read(tutorialKey) === "1";
+  const profileTourSeen = read(profileTourKey) === "1";
   const noticedRaw = read(noticedKey) ?? "[]";
-  const raw = `${me ?? ""}|${muted ? "1" : "0"}|${tutorialSeen ? "1" : "0"}|${noticedRaw}`;
+  const raw = `${me ?? ""}|${muted ? "1" : "0"}|${tutorialSeen ? "1" : "0"}|${profileTourSeen ? "1" : "0"}|${noticedRaw}`;
 
   if (raw !== cachedRaw) {
     let noticed: string[] = [];
@@ -68,7 +77,7 @@ export function prefsSnapshot(): Prefs {
     }
 
     cachedRaw = raw;
-    cached = { me, muted, noticed, tutorialSeen };
+    cached = { me, muted, noticed, tutorialSeen, profileTourSeen };
   }
 
   return cached;
@@ -76,6 +85,10 @@ export function prefsSnapshot(): Prefs {
 
 export function rememberTutorialSeen() {
   write(tutorialKey, "1");
+}
+
+export function rememberProfileTourSeen() {
+  write(profileTourKey, "1");
 }
 
 export function serverPrefsSnapshot(): Prefs {
