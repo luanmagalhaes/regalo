@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { shrinkPhoto } from "@/lib/photo";
+import { PhotoCropper } from "@/components/ui/PhotoCropper";
+import { loadPhoto, type LoadedPhoto } from "@/lib/photo";
 import { sound } from "@/lib/sound";
 
 interface PhotoPickerProps {
@@ -15,6 +16,15 @@ export function PhotoPicker({ photo, emoji, accent, onPick }: PhotoPickerProps) 
   const fileRef = useRef<HTMLInputElement>(null);
   const [working, setWorking] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
+  const [editing, setEditing] = useState<LoadedPhoto | null>(null);
+
+  const close = () => {
+    if (editing) {
+      URL.revokeObjectURL(editing.url);
+    }
+
+    setEditing(null);
+  };
 
   const choose = async (file: File | undefined) => {
     if (!file) {
@@ -25,10 +35,8 @@ export function PhotoPicker({ photo, emoji, accent, onPick }: PhotoPickerProps) 
     setProblem(null);
 
     try {
-      const shrunk = await shrinkPhoto(file);
-
-      sound.pop();
-      onPick(shrunk);
+      sound.pick();
+      setEditing(await loadPhoto(file));
     } catch (cause) {
       sound.oops();
       setProblem(cause instanceof Error ? cause.message : "Não consegui usar essa foto.");
@@ -69,8 +77,10 @@ export function PhotoPicker({ photo, emoji, accent, onPick }: PhotoPickerProps) 
         <div className="min-w-0 flex-1">
           <p className="text-xs text-ink/60">
             {working
-              ? "Preparando a foto..."
-              : "A foto fica pequena e quadrada, do tamanho de um adesivo."}
+              ? "Abrindo a foto..."
+              : photo
+                ? "Com foto, ela aparece no lugar da carinha."
+                : "Você escolhe o pedaço da foto que vai aparecer."}
           </p>
 
           {photo ? (
@@ -83,7 +93,7 @@ export function PhotoPicker({ photo, emoji, accent, onPick }: PhotoPickerProps) 
               }}
               className="display mt-1.5 rounded-xl border-[3px] border-ink bg-paper px-2.5 py-1 text-xs text-ink/70 transition-transform hover:-translate-y-[2px] hover:text-morango"
             >
-              Tirar a foto
+              Tirar a foto e usar a carinha
             </button>
           ) : null}
         </div>
@@ -101,6 +111,18 @@ export function PhotoPicker({ photo, emoji, accent, onPick }: PhotoPickerProps) 
         <p className="mt-2 rounded-2xl border-[3px] border-ink bg-morango px-3 py-2 text-xs font-semibold text-paper">
           {problem}
         </p>
+      ) : null}
+
+      {editing ? (
+        <PhotoCropper
+          photo={editing}
+          accent={accent}
+          onDone={(data) => {
+            onPick(data);
+            close();
+          }}
+          onCancel={close}
+        />
       ) : null}
     </div>
   );
