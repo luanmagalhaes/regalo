@@ -42,6 +42,7 @@ export interface Profile {
   wish: string;
   care: string;
   position: number;
+  locked: boolean;
   items: ProfileItem[];
 }
 

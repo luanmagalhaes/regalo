@@ -2,6 +2,7 @@ import { parseBirthday } from "@/lib/birthday";
 import { serverClient } from "@/lib/supabase/server";
 import { hasIcon } from "@/data/iconKeys";
 import { palettes } from "@/data/palettes";
+import { hashPin, isMasterPin, isPinShaped, pinMatches } from "@/lib/profiles/pin";
 import type { PaletteKey, Profile, ProfileItem, Sticker } from "@/types/profile";
 
 export class ServiceError extends Error {
@@ -40,6 +41,9 @@ interface ProfileRow {
   wish: string | null;
   care: string | null;
   position: number;
+  pin_hash: string | null;
+  pin_fails: number | null;
+  pin_locked_until: string | null;
 }
 
 interface ItemRow {
@@ -171,6 +175,7 @@ function toProfile(row: ProfileRow, items: ItemRow[]): Profile {
     wish: row.wish ?? "",
     care: row.care ?? "",
     position: row.position,
+    locked: Boolean(row.pin_hash),
     items: items
       .filter((item) => item.profile_id === row.id)
       .map(
@@ -493,4 +498,111 @@ export async function deleteItem(id: string): Promise<{ id: string }> {
   }
 
   return { id };
+}
+
+const lockWindowMs = 60_000;
+const failsBeforeLock = 5;
+
+export type ClaimOutcome =
+  | { outcome: "created" }
+  | { outcome: "matched" }
+  | { outcome: "master" };
+
+export async function claimProfile(profileId: string, pin: unknown): Promise<ClaimOutcome> {
+  if (!isPinShaped(pin)) {
+    throw new ServiceError("o PIN tem 4 números", 422);
+  }
+
+  const db = serverClient();
+  const { data, error } = await db
+    .from("profiles")
+    .select("id, pin_hash, pin_fails, pin_locked_until")
+    .eq("id", profileId)
+    .maybeSingle();
+
+  if (error) {
+    fail("falha ao ler o perfil para liberar", error);
+  }
+
+  if (!data) {
+    throw new ServiceError("esse perfil não existe mais", 404);
+  }
+
+  const row = data as {
+    pin_hash: string | null;
+    pin_fails: number | null;
+    pin_locked_until: string | null;
+  };
+
+  if (row.pin_locked_until && new Date(row.pin_locked_until).getTime() > Date.now()) {
+    throw new ServiceError("muitas tentativas seguidas, espere um minuto", 429);
+  }
+
+  if (isMasterPin(pin)) {
+    return { outcome: "master" };
+  }
+
+  if (!row.pin_hash) {
+    const { error: setError } = await db
+      .from("profiles")
+      .update({ pin_hash: hashPin(pin), pin_fails: 0, pin_locked_until: null })
+      .eq("id", profileId);
+
+    if (setError) {
+      fail("falha ao guardar o PIN", setError);
+    }
+
+    return { outcome: "created" };
+  }
+
+  if (!pinMatches(pin, row.pin_hash)) {
+    const fails = (row.pin_fails ?? 0) + 1;
+    const locked = fails >= failsBeforeLock ? new Date(Date.now() + lockWindowMs).toISOString() : null;
+
+    await db
+      .from("profiles")
+      .update({ pin_fails: locked ? 0 : fails, pin_locked_until: locked })
+      .eq("id", profileId);
+
+    throw new ServiceError(locked ? "errou demais, espere um minuto" : "esse PIN não confere", 401);
+  }
+
+  if ((row.pin_fails ?? 0) > 0 || row.pin_locked_until) {
+    await db.from("profiles").update({ pin_fails: 0, pin_locked_until: null }).eq("id", profileId);
+  }
+
+  return { outcome: "matched" };
+}
+
+export async function resetPin(profileId: string): Promise<{ id: string }> {
+  const db = serverClient();
+  const { error } = await db
+    .from("profiles")
+    .update({ pin_hash: null, pin_fails: 0, pin_locked_until: null })
+    .eq("id", profileId);
+
+  if (error) {
+    fail("falha ao limpar o PIN", error);
+  }
+
+  return { id: profileId };
+}
+
+export async function profileIdForItem(itemId: string): Promise<string> {
+  const db = serverClient();
+  const { data, error } = await db
+    .from("profile_items")
+    .select("profile_id")
+    .eq("id", itemId)
+    .maybeSingle();
+
+  if (error) {
+    fail("falha ao localizar o item", error);
+  }
+
+  if (!data) {
+    throw new ServiceError("esse item não existe mais", 404);
+  }
+
+  return (data as { profile_id: string }).profile_id;
 }

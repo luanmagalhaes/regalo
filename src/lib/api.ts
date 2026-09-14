@@ -76,7 +76,20 @@ export const api = {
 
   lock: () => request<SessionState>("/api/session", { method: "DELETE" }),
 
-  profiles: () => request<{ profiles: Profile[] }>("/api/profiles"),
+  profiles: () =>
+    request<{ profiles: Profile[]; owned: string[]; master: boolean }>("/api/profiles"),
+
+  claim: (id: string, pin: string) =>
+    request<{ outcome: "created" | "matched" | "master" }>(`/api/profiles/${id}/claim`, {
+      method: "POST",
+      body: JSON.stringify({ pin }),
+    }),
+
+  release: (id: string) =>
+    request<{ released: string }>(`/api/profiles/${id}/claim`, { method: "DELETE" }),
+
+  resetPin: (id: string) =>
+    request<{ id: string }>(`/api/profiles/${id}/pin`, { method: "DELETE" }),
 
   createProfile: (draft: ProfileDraft) =>
     request<{ profile: Profile }>("/api/profiles", {

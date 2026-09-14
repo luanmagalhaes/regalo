@@ -30,8 +30,20 @@ import {
 import type { ItemDraft, Profile, ProfileDraft } from "@/types/profile";
 
 export function RegaloApp() {
-  const { profiles, gate, setGate, error, setError, loading, refresh, addProfile, replaceProfile, dropProfile } =
-    useProfiles();
+  const {
+    profiles,
+    owned,
+    master,
+    gate,
+    setGate,
+    error,
+    setError,
+    loading,
+    refresh,
+    addProfile,
+    replaceProfile,
+    dropProfile,
+  } = useProfiles();
   const prefs = useSyncExternalStore(subscribePrefs, prefsSnapshot, serverPrefsSnapshot);
   const [openId, setOpenId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -39,6 +51,8 @@ export function RegaloApp() {
   const push = useSyncExternalStore(subscribePush, pushSnapshot, serverPushSnapshot);
   const [splashDone, setSplashDone] = useState(false);
   const [askedHelp, setAskedHelp] = useState(false);
+  const [claiming, setClaiming] = useState(false);
+  const [claimProblem, setClaimProblem] = useState<string | null>(null);
   const noticedRef = useRef<string[]>([]);
 
   useEffect(() => {
@@ -168,7 +182,43 @@ export function RegaloApp() {
           sound.tap();
           setOpenId(null);
         }}
-        onClaim={() => rememberMe(open.id)}
+        canEdit={master || owned.includes(open.id)}
+        master={master}
+        claiming={claiming}
+        claimProblem={claimProblem}
+        onClaimPin={(pin) => {
+          setClaiming(true);
+          setClaimProblem(null);
+
+          void api
+            .claim(open.id, pin)
+            .then((result) => {
+              sound.party();
+
+              if (result.outcome !== "master") {
+                rememberMe(open.id);
+              }
+
+              return refresh();
+            })
+            .catch((cause: unknown) => {
+              sound.oops();
+              setClaimProblem(cause instanceof Error ? cause.message : "não consegui liberar");
+            })
+            .finally(() => setClaiming(false));
+        }}
+        onRelease={() => {
+          void api
+            .release(open.id)
+            .then(() => {
+              if (prefs.me === open.id) {
+                rememberMe(null);
+              }
+
+              return refresh();
+            })
+            .catch(() => undefined);
+        }}
         onPatch={patch}
         onDelete={() =>
           void run(

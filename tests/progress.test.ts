@@ -27,6 +27,7 @@ const profile = (patch: Partial<Profile> = {}): Profile => ({
   wish: "",
   care: "",
   position: 0,
+  locked: false,
   items: [],
   ...patch,
 });

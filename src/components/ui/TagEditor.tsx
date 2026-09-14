@@ -11,6 +11,7 @@ interface TagEditorProps {
   accent: string;
   placeholder: string;
   busy?: boolean;
+  readOnly?: boolean;
   onChange: (tags: string[]) => void;
 }
 
@@ -21,6 +22,7 @@ export function TagEditor({
   accent,
   placeholder,
   busy = false,
+  readOnly = false,
   onChange,
 }: TagEditorProps) {
   const [draft, setDraft] = useState("");
@@ -68,6 +70,7 @@ export function TagEditor({
               style={{ backgroundColor: accent }}
             >
               <span className="max-w-[12rem] truncate">{tag}</span>
+              {readOnly ? null : (
               <button
                 type="button"
                 disabled={busy}
@@ -80,11 +83,13 @@ export function TagEditor({
               >
                 ✕
               </button>
+              )}
             </li>
           ))
         )}
       </ul>
 
+      {readOnly ? null : (
       <div className="mt-3 flex items-center gap-2">
         <input
           value={draft}
@@ -114,6 +119,7 @@ export function TagEditor({
           +
         </button>
       </div>
+      )}
 
       {problem ? (
         <p className="mt-2 rounded-2xl border-[3px] border-ink bg-morango px-3 py-2 text-xs font-semibold text-paper">

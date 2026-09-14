@@ -8,16 +8,23 @@ import type { ProfileItem } from "@/types/profile";
 interface ItemTileProps {
   item: ProfileItem;
   palette: Palette;
+  interactive: boolean;
   onOpen: () => void;
 }
 
-export function ItemTile({ item, palette, onOpen }: ItemTileProps) {
+export function ItemTile({ item, palette, interactive, onOpen }: ItemTileProps) {
+  const Tag = interactive ? "button" : "div";
+
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      aria-label={`Editar ${item.label}`}
-      className="animate-pop-in group relative flex flex-col items-center gap-1 rounded-[1.5rem] border-[3px] border-ink bg-paper p-2.5 text-center shadow-[0_4px_0_var(--color-ink)] transition-transform duration-150 hover:-translate-y-[3px] active:translate-y-[2px]"
+    <Tag
+      {...(interactive
+        ? { type: "button" as const, onClick: onOpen, "aria-label": `Editar ${item.label}` }
+        : {})}
+      className={`animate-pop-in relative flex flex-col items-center gap-1 rounded-[1.5rem] border-[3px] border-ink bg-paper p-2.5 text-center shadow-[0_4px_0_var(--color-ink)] ${
+        interactive
+          ? "transition-transform duration-150 hover:-translate-y-[3px] active:translate-y-[2px]"
+          : ""
+      }`}
     >
       <span className="display w-full truncate text-[0.68rem] uppercase tracking-[0.1em] text-ink/55">
         {item.label}
@@ -39,6 +46,6 @@ export function ItemTile({ item, palette, onOpen }: ItemTileProps) {
           {copy.profile.pendingTag}
         </span>
       ) : null}
-    </button>
+    </Tag>
   );
 }

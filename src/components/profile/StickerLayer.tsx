@@ -6,6 +6,7 @@ import type { Sticker } from "@/types/profile";
 
 interface StickerLayerProps {
   stickers: readonly Sticker[];
+  draggable: boolean;
   onChange: (stickers: Sticker[]) => void;
   onCommit: (stickers: Sticker[]) => void;
 }
@@ -13,7 +14,7 @@ interface StickerLayerProps {
 const minScale = 0.6;
 const maxScale = 2.6;
 
-export function StickerLayer({ stickers, onChange, onCommit }: StickerLayerProps) {
+export function StickerLayer({ stickers, draggable, onChange, onCommit }: StickerLayerProps) {
   const areaRef = useRef<HTMLDivElement>(null);
   const draggingId = useRef<string | null>(null);
   const moved = useRef(false);
@@ -62,8 +63,13 @@ export function StickerLayer({ stickers, onChange, onCommit }: StickerLayerProps
         >
           <button
             type="button"
+            disabled={!draggable}
             aria-label={`Adesivo ${sticker.emoji}. Arraste para mover, toque para ajustar.`}
             onPointerDown={(event) => {
+              if (!draggable) {
+                return;
+              }
+
               draggingId.current = sticker.id;
               moved.current = false;
               event.currentTarget.setPointerCapture(event.pointerId);
@@ -92,7 +98,9 @@ export function StickerLayer({ stickers, onChange, onCommit }: StickerLayerProps
                 setSelected((current) => (current === sticker.id ? null : sticker.id));
               }
             }}
-            className="pointer-events-auto block cursor-grab select-none text-4xl leading-none active:cursor-grabbing"
+            className={`block select-none text-4xl leading-none ${
+              draggable ? "pointer-events-auto cursor-grab active:cursor-grabbing" : "pointer-events-none"
+            }`}
             style={{
               transform: `translate(-50%, -50%) scale(${sticker.scale}) rotate(${sticker.rotation}deg)`,
               touchAction: "none",
@@ -101,7 +109,7 @@ export function StickerLayer({ stickers, onChange, onCommit }: StickerLayerProps
             {sticker.emoji}
           </button>
 
-          {selected === sticker.id ? (
+          {draggable && selected === sticker.id ? (
             <div
               className="pointer-events-auto absolute z-10 flex -translate-x-1/2 items-center gap-0.5 rounded-2xl border-[3px] border-ink bg-paper px-1.5 py-1 shadow-[0_4px_0_var(--color-ink)]"
               style={{ left: "50%", top: "calc(50% + 2.2rem)" }}

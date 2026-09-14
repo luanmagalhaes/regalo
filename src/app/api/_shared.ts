@@ -2,6 +2,14 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { ServiceError } from "@/lib/profiles/service";
+import {
+  ownerCookieMaxAge,
+  ownerCookieName,
+  ownsProfile,
+  packClaims,
+  readClaims,
+  type OwnerClaims,
+} from "@/lib/profiles/owner";
 
 export const cookieName = "regalo_key";
 export const cookieMaxAge = 60 * 60 * 24 * 180;
@@ -61,5 +69,33 @@ export async function readBody(request: Request): Promise<unknown> {
     return await request.json();
   } catch {
     throw new ServiceError("não entendi o que veio no pedido", 400);
+  }
+}
+
+export async function ownerClaims(): Promise<OwnerClaims> {
+  const store = await cookies();
+
+  return readClaims(store.get(ownerCookieName)?.value);
+}
+
+export async function saveClaims(claims: OwnerClaims) {
+  const store = await cookies();
+
+  store.set({
+    name: ownerCookieName,
+    value: packClaims(claims),
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: ownerCookieMaxAge,
+  });
+}
+
+export async function assertOwner(profileId: string) {
+  const claims = await ownerClaims();
+
+  if (!ownsProfile(claims, profileId)) {
+    throw new ServiceError("esse espaço é de outra pessoa; entre com o PIN dela para editar", 403);
   }
 }

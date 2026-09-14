@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BadgeShelf, LevelBar } from "@/components/profile/LevelBar";
 import { ItemSheet } from "@/components/profile/ItemSheet";
 import { ItemTile } from "@/components/profile/ItemTile";
+import { PinSheet } from "@/components/profile/PinSheet";
 import { ProfileSettingsSheet } from "@/components/profile/ProfileSettingsSheet";
 import { StickerLayer } from "@/components/profile/StickerLayer";
 import { StickerPicker } from "@/components/profile/StickerPicker";
@@ -68,12 +69,17 @@ const tourSteps: readonly TourStep[] = [
 interface ProfileScreenProps {
   profile: Profile;
   isMe: boolean;
+  canEdit: boolean;
+  master: boolean;
+  claiming: boolean;
+  claimProblem: string | null;
+  onClaimPin: (pin: string) => void;
+  onRelease: () => void;
   autoTour: boolean;
   onTourDone: () => void;
   busy: boolean;
   error: string | null;
   onBack: () => void;
-  onClaim: () => void;
   onPatch: (patch: ProfilePatch) => void;
   onDelete: () => void;
   onCreateItem: (draft: ItemDraft) => void;
@@ -84,12 +90,17 @@ interface ProfileScreenProps {
 export function ProfileScreen({
   profile,
   isMe,
+  canEdit,
+  master,
+  claiming,
+  claimProblem,
+  onClaimPin,
+  onRelease,
   autoTour,
   onTourDone,
   busy,
   error,
   onBack,
-  onClaim,
   onPatch,
   onDelete,
   onCreateItem,
@@ -110,6 +121,7 @@ export function ProfileScreen({
   const [confirmingItem, setConfirmingItem] = useState<ProfileItem | null>(null);
   const [localStickers, setLocalStickers] = useState<Sticker[] | null>(null);
   const [touring, setTouring] = useState(autoTour);
+  const [askingPin, setAskingPin] = useState(false);
 
   const stickers = localStickers ?? profile.stickers;
 
@@ -146,37 +158,51 @@ export function ProfileScreen({
               ← Turma
             </Button>
             <span data-tour="add" className="flex-1">
-            <Button
-              variant="candy"
-              size="lg"
-              fullWidth
-              disabled={busy}
-              onClick={() => {
-                sound.tap();
-                setCreatingItem(true);
-              }}
-            >
-              + Guardar um item
-            </Button>
+              <Button
+                variant="candy"
+                size="lg"
+                fullWidth
+                disabled={busy || !canEdit}
+                onClick={() => {
+                  sound.tap();
+                  setCreatingItem(true);
+                }}
+              >
+                {canEdit ? "+ Guardar um item" : "🔒 Só o dono edita"}
+              </Button>
             </span>
           </div>
 
           <div data-tour="claim">
-            {isMe ? (
-              <p className="display text-center text-xs text-ink/55">
-                ✓ Esse perfil é o seu. {brand.ownerCall}
-              </p>
+            {canEdit ? (
+              <div className="flex items-center justify-center gap-2">
+                <p className="display text-xs text-ink/55">
+                  {master ? "🔑 Modo dono da casa: você edita todos" : "✓ Esse espaço é seu"}
+                </p>
+                {master ? null : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.tap();
+                      onRelease();
+                    }}
+                    className="display rounded-xl border-[3px] border-ink bg-paper px-2 py-0.5 text-[0.65rem] text-ink/60 transition-transform hover:-translate-y-[1px]"
+                  >
+                    sair
+                  </button>
+                )}
+              </div>
             ) : (
               <Button
                 variant="mint"
                 size="md"
                 fullWidth
                 onClick={() => {
-                  sound.party();
-                  onClaim();
+                  sound.pick();
+                  setAskingPin(true);
                 }}
               >
-                🙋 Esse sou eu
+                {profile.locked ? "🔒 Esse sou eu (tenho o PIN)" : "🙋 Esse sou eu"}
               </Button>
             )}
           </div>
@@ -186,7 +212,7 @@ export function ProfileScreen({
       <div className="flex flex-col gap-4 pb-4">
         <div className="flex items-center justify-center gap-2">
           <span className="display rounded-full border-[3px] border-ink bg-paper px-3 py-1.5 text-center text-xs text-ink">
-            {isMe ? brand.ownerCall : `Espaço de ${profile.name}`}
+            {canEdit ? brand.ownerCall : `Espaço de ${profile.name} · só leitura`}
           </span>
           <button
             type="button"
@@ -235,6 +261,7 @@ export function ProfileScreen({
             </div>
           </div>
 
+          {canEdit ? (
           <div data-tour="customize" className="relative mt-4 flex flex-wrap justify-center gap-2">
             <button
               type="button"
@@ -257,12 +284,22 @@ export function ProfileScreen({
               ✨ Colar adesivo
             </button>
           </div>
+          ) : (
+            <div data-tour="customize" />
+          )}
 
-          <p className="relative mt-2 text-center text-xs text-ink/55">
-            {copy.profile.stickersHint}
-          </p>
+          {canEdit ? (
+            <p className="relative mt-2 text-center text-xs text-ink/55">
+              {copy.profile.stickersHint}
+            </p>
+          ) : null}
 
-          <StickerLayer stickers={stickers} onChange={setLocalStickers} onCommit={commitStickers} />
+          <StickerLayer
+            stickers={stickers}
+            draggable={canEdit}
+            onChange={setLocalStickers}
+            onCommit={commitStickers}
+          />
         </section>
 
         {error ? (
@@ -286,6 +323,7 @@ export function ProfileScreen({
             defaultValue={profile.wish}
             maxLength={600}
             rows={4}
+            readOnly={!canEdit}
             lang="pt-BR"
             placeholder="Escreva solto: marca, cor, tamanho da caneca, aquele jogo que você quer, o que já tem repetido..."
             onBlur={(event) => {
@@ -314,6 +352,7 @@ export function ProfileScreen({
                 key={item.id}
                 item={item}
                 palette={palette}
+                interactive={canEdit}
                 onOpen={() => {
                   sound.tap();
                   setOpenItem(item);
@@ -321,6 +360,7 @@ export function ProfileScreen({
               />
             ))}
 
+            {canEdit ? (
             <button
               type="button"
               onClick={() => {
@@ -333,6 +373,7 @@ export function ProfileScreen({
               <span className="display text-3xl leading-none">+</span>
               <span className="display text-[0.68rem]">Novo item</span>
             </button>
+            ) : null}
           </div>
 
           {profile.items.length === 0 ? (
@@ -350,6 +391,7 @@ export function ProfileScreen({
           accent={palette.soft}
           placeholder="coisas cheirosas, livro, jogo..."
           busy={busy}
+          readOnly={!canEdit}
           onChange={(loves) => onPatch({ loves })}
         />
 
@@ -360,6 +402,7 @@ export function ProfileScreen({
           accent="#ffe1e9"
           placeholder="boné aba reta, cor muito forte..."
           busy={busy}
+          readOnly={!canEdit}
           onChange={(dislikes) => onPatch({ dislikes })}
         />
 
@@ -370,6 +413,7 @@ export function ProfileScreen({
           accent="#eae4ff"
           placeholder="hidratante, perfume, roupa..."
           busy={busy}
+          readOnly={!canEdit}
           onChange={(plenty) => onPatch({ plenty })}
         />
         </div>
@@ -387,6 +431,7 @@ export function ProfileScreen({
             defaultValue={profile.care}
             maxLength={280}
             rows={2}
+            readOnly={!canEdit}
             lang="pt-BR"
             placeholder="Alergia, restrição alimentar, algo que a turma precisa saber."
             onBlur={(event) => {
@@ -405,6 +450,22 @@ export function ProfileScreen({
           <BadgeShelf progress={progress} palette={palette} />
         </section>
       </div>
+
+      {askingPin ? (
+        <PinSheet
+          name={profile.name}
+          emoji={profile.emoji}
+          locked={profile.locked}
+          palette={palette}
+          busy={claiming}
+          problem={claimProblem}
+          onSubmit={(pin) => {
+            onClaimPin(pin);
+            setAskingPin(false);
+          }}
+          onClose={() => setAskingPin(false)}
+        />
+      ) : null}
 
       {touring ? (
         <GuidedTour

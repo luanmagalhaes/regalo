@@ -10,15 +10,19 @@ export type Gate = "checking" | "locked" | "open";
 
 export function useProfiles() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [owned, setOwned] = useState<string[]>([]);
+  const [master, setMaster] = useState(false);
   const [gate, setGate] = useState<Gate>("checking");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     try {
-      const { profiles: fresh } = await api.profiles();
+      const { profiles: fresh, owned: mine, master: boss } = await api.profiles();
 
       setProfiles(fresh);
+      setOwned(mine);
+      setMaster(boss);
       setGate("open");
       setError(null);
     } catch (cause) {
@@ -70,6 +74,8 @@ export function useProfiles() {
 
   return {
     profiles,
+    owned,
+    master,
     gate,
     setGate,
     error,
