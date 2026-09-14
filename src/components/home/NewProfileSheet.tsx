@@ -89,6 +89,19 @@ export function NewProfileSheet({ busy, onCreate, onClose }: NewProfileSheetProp
           }}
         />
 
+        <TextField
+          label="Data de nascimento (opcional)"
+          type="date"
+          value={birthday}
+          min="1900-01-01"
+          max={new Date().toISOString().slice(0, 10)}
+          hint="Dia, mês e ano de nascimento. Com ela, o aviso chega 15 dias antes."
+          onChange={(event) => {
+            setBirthday(event.target.value);
+            setProblem(null);
+          }}
+        />
+
         <PhotoPicker
           photo={photo}
           emoji={emoji}
@@ -162,18 +175,6 @@ export function NewProfileSheet({ busy, onCreate, onClose }: NewProfileSheetProp
           }}
         />
 
-        <TextField
-          label="Data de nascimento (opcional)"
-          type="date"
-          value={birthday}
-          min="1900-01-01"
-          max={new Date().toISOString().slice(0, 10)}
-          hint="Dia, mês e ano de nascimento. Com ela, o aviso chega 15 dias antes."
-          onChange={(event) => {
-            setBirthday(event.target.value);
-            setProblem(null);
-          }}
-        />
 
         {problem ? (
           <p className="rounded-2xl border-[3px] border-ink bg-morango px-3 py-2 text-xs font-semibold text-paper">
