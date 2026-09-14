@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { sound } from "@/lib/sound";
 
@@ -16,6 +16,7 @@ interface Spot {
   top: number;
   width: number;
   height: number;
+  tall: boolean;
 }
 
 interface GuidedTourProps {
@@ -24,8 +25,9 @@ interface GuidedTourProps {
 }
 
 const padding = 8;
+const gap = 16;
 
-function spotFor(target: string): Spot | null {
+function spotFor(target: string, balloonHeight: number): Spot | null {
   const node = document.querySelector(`[data-tour="${target}"]`);
 
   if (!node) {
@@ -33,31 +35,37 @@ function spotFor(target: string): Spot | null {
   }
 
   const box = node.getBoundingClientRect();
-  const top = Math.max(4, box.top - padding);
-  const tallest = window.innerHeight * 0.52;
+  const wanted = box.height + padding * 2;
+  const room = window.innerHeight - balloonHeight - gap * 2;
+  const tall = wanted > room;
+  const top = tall ? gap : Math.max(gap, box.top - padding);
 
   return {
     left: Math.max(4, box.left - padding),
     top,
     width: Math.min(window.innerWidth - 8, box.width + padding * 2),
-    height: Math.min(tallest, box.height + padding * 2),
+    height: Math.min(wanted, window.innerHeight - balloonHeight - gap * 2 - top + gap),
+    tall,
   };
 }
 
 export function GuidedTour({ steps, onClose }: GuidedTourProps) {
   const [index, setIndex] = useState(0);
   const [spot, setSpot] = useState<Spot | null>(null);
+  const balloonRef = useRef<HTMLDivElement>(null);
 
   const step = steps[index];
 
   const measure = useCallback(() => {
-    setSpot(spotFor(steps[index].target));
+    setSpot(spotFor(steps[index].target, balloonRef.current?.offsetHeight ?? 230));
   }, [index, steps]);
 
   useEffect(() => {
     const node = document.querySelector(`[data-tour="${steps[index].target}"]`);
+    const box = node?.getBoundingClientRect();
+    const roomy = box ? box.height + padding * 2 < window.innerHeight * 0.5 : true;
 
-    node?.scrollIntoView({ block: "center", behavior: "smooth" });
+    node?.scrollIntoView({ block: roomy ? "center" : "start", behavior: "smooth" });
 
     const settle = window.setTimeout(measure, 420);
     const again = window.setTimeout(measure, 900);
@@ -75,7 +83,8 @@ export function GuidedTour({ steps, onClose }: GuidedTourProps) {
 
   const last = index === steps.length - 1;
   const targetMiddle = spot === null ? 0 : spot.top + spot.height / 2;
-  const balloonBelow = spot === null || targetMiddle < window.innerHeight / 2;
+  const balloonBelow =
+    spot === null || spot.tall || targetMiddle < window.innerHeight / 2;
 
   return (
     <div className="fixed inset-0 z-[75]" role="dialog" aria-modal="true" aria-label={step.title}>
@@ -95,6 +104,7 @@ export function GuidedTour({ steps, onClose }: GuidedTourProps) {
       )}
 
       <div
+        ref={balloonRef}
         className="animate-pop-in fixed left-1/2 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 rounded-[1.5rem] border-[3px] border-ink bg-paper p-4 shadow-[0_8px_0_var(--color-ink)]"
         style={
           balloonBelow
