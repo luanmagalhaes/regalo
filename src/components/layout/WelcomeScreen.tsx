@@ -53,9 +53,20 @@ export function WelcomeScreen({ onIn }: WelcomeScreenProps) {
         setPicked(null);
         onIn(profileId);
       })
-      .catch((cause: unknown) => {
+      .catch(async (cause: unknown) => {
         sound.oops();
         setProblem(cause instanceof Error ? cause.message : "Não consegui entrar");
+
+        try {
+          const { roster: fresh } = await api.roster();
+
+          setRoster(fresh);
+          setPicked((current) =>
+            current ? (fresh.find((entry) => entry.id === current.id) ?? current) : current,
+          );
+        } catch {
+          return;
+        }
       })
       .finally(() => setBusy(false));
   };

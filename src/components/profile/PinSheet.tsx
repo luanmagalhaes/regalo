@@ -101,9 +101,9 @@ export function PinSheet({
 
   const subtitle = creating
     ? asking
-      ? "Só para ter certeza de que você não esqueceu no meio do caminho."
-      : `Quatro números para ninguém mexer no espaço de ${name} sem querer.`
-    : `Digite o PIN de ${name} para editar este espaço.`;
+      ? "Repita os mesmos 4 números. Ao confirmar, esse vira o PIN definitivo deste espaço."
+      : `Este espaço ainda não tem PIN. Os 4 números que você escolher agora ficam valendo.`
+    : `Este espaço já tem PIN. Digite os 4 números de ${name} para editar.`;
 
   return (
     <Sheet title={title} subtitle={subtitle} accent={palette.soft} onClose={onClose}>
@@ -165,7 +165,7 @@ export function PinSheet({
           {busy
             ? "Conferindo..."
             : creating
-              ? "Guarde esse número: é ele que abre o seu espaço nos outros celulares."
+              ? "Anote esse número: é ele que abre o seu espaço em qualquer celular, e ele fica gravado assim que você confirmar."
               : "Esqueceu? Chame o dono da casa para liberar com a senha mestre."}
         </p>
       </div>

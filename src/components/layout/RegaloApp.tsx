@@ -181,7 +181,8 @@ export function RegaloApp() {
             })
             .catch((cause: unknown) => {
               sound.oops();
-              setClaimProblem(cause instanceof Error ? cause.message : "não consegui liberar");
+              setClaimProblem(cause instanceof Error ? cause.message : "Não consegui liberar");
+              void refresh();
             })
             .finally(() => setClaiming(false));
         }}

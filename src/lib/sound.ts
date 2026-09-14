@@ -127,6 +127,24 @@ export const sound = {
       { hz: 1318.51, at: 0.42, seconds: 0.3, wave: "sine", gain: 0.08 },
     ]),
 
+  opening: () =>
+    play([
+      { hz: 523.25, at: 0, seconds: 0.16, wave: "triangle", gain: 0.1 },
+      { hz: 659.25, at: 0.13, seconds: 0.16, wave: "triangle", gain: 0.1 },
+      { hz: 783.99, at: 0.26, seconds: 0.16, wave: "triangle", gain: 0.1 },
+      { hz: 1046.5, at: 0.39, seconds: 0.2, wave: "triangle", gain: 0.11 },
+
+      { hz: 1318.51, at: 0.58, seconds: 0.26, wave: "sine", gain: 0.09 },
+      { hz: 1567.98, at: 0.58, seconds: 0.26, wave: "sine", gain: 0.06 },
+
+      { hz: 987.77, at: 0.86, seconds: 0.14, wave: "triangle", gain: 0.09 },
+      { hz: 1174.66, at: 1, seconds: 0.14, wave: "triangle", gain: 0.09 },
+      { hz: 1567.98, at: 1.14, seconds: 0.44, wave: "triangle", gain: 0.12 },
+      { hz: 2093, at: 1.18, seconds: 0.4, wave: "sine", gain: 0.05 },
+
+      { hz: 2637.02, at: 1.3, seconds: 0.3, wave: "sine", gain: 0.035 },
+    ]),
+
   oops: () =>
     play([
       { hz: 330, at: 0, seconds: 0.14, wave: "sawtooth", gain: 0.07, slideTo: 220 },

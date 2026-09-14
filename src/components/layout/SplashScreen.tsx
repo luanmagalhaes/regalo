@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { GiftArt } from "@/components/ui/GiftArt";
 import { brand } from "@/data/copy";
-import { sound } from "@/lib/sound";
+import { sound, unlockSound } from "@/lib/sound";
 
 const holdMs = 1900;
 const fadeMs = 560;
@@ -16,11 +16,13 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
-    const pop = window.setTimeout(() => sound.pop(), 700);
+    unlockSound();
+
+    const music = window.setTimeout(() => sound.opening(), 120);
     const start = window.setTimeout(() => setLeaving(true), holdMs);
 
     return () => {
-      window.clearTimeout(pop);
+      window.clearTimeout(music);
       window.clearTimeout(start);
     };
   }, []);
