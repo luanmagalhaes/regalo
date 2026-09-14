@@ -1,0 +1,249 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { GateScreen } from "@/components/layout/GateScreen";
+import { HomeScreen } from "@/components/home/HomeScreen";
+import { NewProfileSheet } from "@/components/home/NewProfileSheet";
+import { ProfileScreen } from "@/components/profile/ProfileScreen";
+import { countdownLabel, daysUntilBirthday, isNear } from "@/lib/birthday";
+import { useProfiles } from "@/hooks/useProfiles";
+import { api, type ProfilePatch } from "@/lib/api";
+import {
+  prefsSnapshot,
+  rememberMe,
+  rememberMuted,
+  rememberNoticed,
+  serverPrefsSnapshot,
+  subscribePrefs,
+} from "@/lib/prefs";
+import { applyMuted, sound, unlockSound } from "@/lib/sound";
+import type { ItemDraft, Profile, ProfileDraft } from "@/types/profile";
+
+type PushState = "unsupported" | "default" | "granted" | "denied";
+
+function pushState(): PushState {
+  if (typeof window === "undefined" || !("Notification" in window)) {
+    return "unsupported";
+  }
+
+  return Notification.permission as PushState;
+}
+
+export function RegaloApp() {
+  const { profiles, gate, setGate, error, setError, loading, refresh, addProfile, replaceProfile, dropProfile } =
+    useProfiles();
+  const prefs = useSyncExternalStore(subscribePrefs, prefsSnapshot, serverPrefsSnapshot);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [push, setPush] = useState<PushState>("unsupported");
+  const noticedRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    applyMuted(prefs.muted);
+  }, [prefs.muted]);
+
+  useEffect(() => {
+    noticedRef.current = prefs.noticed;
+  }, [prefs.noticed]);
+
+  useEffect(() => {
+    setPush(pushState());
+
+    const prime = () => unlockSound();
+
+    window.addEventListener("pointerdown", prime, { once: true });
+
+    return () => window.removeEventListener("pointerdown", prime);
+  }, []);
+
+  useEffect(() => {
+    if (pushState() !== "granted") {
+      return;
+    }
+
+    const year = new Date().getFullYear();
+    const fresh = profiles.filter(
+      (profile) => isNear(profile.birthday) && !noticedRef.current.includes(`${profile.id}:${year}`),
+    );
+
+    if (fresh.length === 0) {
+      return;
+    }
+
+    for (const profile of fresh) {
+      try {
+        const distance = daysUntilBirthday(profile.birthday);
+
+        new Notification("Regalo", {
+          body: `${profile.name} faz aniversário ${countdownLabel(distance).toLowerCase()}. Dá uma olhada na lista.`,
+          icon: "/icon-192.png",
+          tag: `regalo-${profile.id}-${year}`,
+        });
+      } catch {
+        break;
+      }
+    }
+
+    const tokens = [...noticedRef.current, ...fresh.map((profile) => `${profile.id}:${year}`)];
+
+    noticedRef.current = tokens;
+    rememberNoticed(tokens);
+  }, [profiles]);
+
+  const run = useCallback(
+    async <T,>(action: () => Promise<T>, after?: (result: T) => void) => {
+      setBusy(true);
+      setError(null);
+
+      try {
+        const result = await action();
+
+        after?.(result);
+      } catch (cause) {
+        sound.oops();
+        setError(cause instanceof Error ? cause.message : "não consegui guardar isso");
+        void refresh();
+      } finally {
+        setBusy(false);
+      }
+    },
+    [refresh, setError],
+  );
+
+  const askPush = useCallback(() => {
+    if (!("Notification" in window)) {
+      return;
+    }
+
+    void Notification.requestPermission().then((answer) => {
+      setPush(answer as PushState);
+
+      if (answer === "granted") {
+        sound.party();
+      }
+    });
+  }, []);
+
+  if (gate === "locked") {
+    return (
+      <GateScreen
+        onOpen={() => {
+          setGate("checking");
+          void refresh();
+        }}
+      />
+    );
+  }
+
+  const open = profiles.find((profile) => profile.id === openId) ?? null;
+
+  if (open) {
+    const patch = (change: ProfilePatch) =>
+      void run(
+        () => api.updateProfile(open.id, change),
+        ({ profile }) => replaceProfile(profile),
+      );
+
+    return (
+      <ProfileScreen
+        profile={open}
+        isMe={prefs.me === open.id}
+        busy={busy}
+        error={error}
+        onBack={() => {
+          sound.tap();
+          setOpenId(null);
+        }}
+        onClaim={() => rememberMe(open.id)}
+        onPatch={patch}
+        onDelete={() =>
+          void run(
+            () => api.deleteProfile(open.id),
+            () => {
+              if (prefs.me === open.id) {
+                rememberMe(null);
+              }
+
+              dropProfile(open.id);
+              setOpenId(null);
+            },
+          )
+        }
+        onCreateItem={(draft: ItemDraft) =>
+          void run(
+            () => api.createItem(open.id, draft),
+            ({ item }) => replaceProfile({ ...open, items: [...open.items, item] }),
+          )
+        }
+        onUpdateItem={(id, draft) =>
+          void run(
+            () => api.updateItem(id, draft),
+            ({ item }) =>
+              replaceProfile({
+                ...open,
+                items: open.items.map((entry) => (entry.id === id ? item : entry)),
+              }),
+          )
+        }
+        onDeleteItem={(id) =>
+          void run(
+            () => api.deleteItem(id),
+            () =>
+              replaceProfile({
+                ...open,
+                items: open.items.filter((entry) => entry.id !== id),
+              }),
+          )
+        }
+      />
+    );
+  }
+
+  return (
+    <>
+      <HomeScreen
+        profiles={profiles}
+        meId={prefs.me}
+        loading={loading}
+        error={error}
+        muted={prefs.muted}
+        canAskPush={push === "default"}
+        onAskPush={askPush}
+        onToggleSound={() => {
+          applyMuted(!prefs.muted);
+          rememberMuted(!prefs.muted);
+
+          if (prefs.muted) {
+            unlockSound();
+            sound.pop();
+          }
+        }}
+        onOpen={(profile: Profile) => setOpenId(profile.id)}
+        onCreate={() => setCreating(true)}
+      />
+
+      {creating ? (
+        <NewProfileSheet
+          busy={busy}
+          onCreate={(draft: ProfileDraft) =>
+            void run(
+              () => api.createProfile(draft),
+              ({ profile }) => {
+                addProfile(profile);
+                setCreating(false);
+
+                if (prefs.me === null) {
+                  rememberMe(profile.id);
+                }
+
+                setOpenId(profile.id);
+              },
+            )
+          }
+          onClose={() => setCreating(false)}
+        />
+      ) : null}
+    </>
+  );
+}
