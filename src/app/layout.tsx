@@ -23,6 +23,7 @@ export const metadata: Metadata = {
   applicationName: brand.name,
   robots: { index: false, follow: false },
   appleWebApp: { capable: true, title: brand.name, statusBarStyle: "black-translucent" },
+  icons: { icon: "/icon-192.png", apple: "/apple-icon.png" },
   openGraph: {
     title: brand.name,
     description: brand.tagline,
