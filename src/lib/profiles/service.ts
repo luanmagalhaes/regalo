@@ -240,7 +240,7 @@ async function assertNameFree(name: string, exceptId?: string) {
   );
 
   if (taken) {
-    throw new ServiceError("já tem alguém com esse nome na turma", 409);
+    throw new ServiceError("já tem alguém com esse nome no Bibuaidi", 409);
   }
 }
 
@@ -261,7 +261,7 @@ export async function listRoster(): Promise<RosterEntry[]> {
     .order("position", { ascending: true });
 
   if (error) {
-    fail("falha ao listar a turma", error);
+    fail("falha ao listar o Bibuaidi", error);
   }
 
   return (data as ProfileRow[]).map((row) => ({
@@ -298,7 +298,7 @@ export async function createProfile(body: unknown): Promise<Profile> {
   }
 
   if ((count ?? 0) >= maxProfiles) {
-    throw new ServiceError(`a turma já tem ${maxProfiles} perfis`, 409);
+    throw new ServiceError(`o Bibuaidi já tem ${maxProfiles} perfis`, 409);
   }
 
   const { data, error } = await db

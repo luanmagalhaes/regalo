@@ -59,7 +59,7 @@ export function PushInvite({ onDone }: PushInviteProps) {
             <>
               <p>
                 O Regalo avisa <strong>{nearWindow} dias antes</strong> do aniversário de cada um da
-                turma. Chega no celular, mesmo com o app fechado.
+                Bibuaidi. Chega no celular, mesmo com o app fechado.
               </p>
               <p className="mt-2 rounded-xl bg-cream px-3 py-2 text-xs">
                 O celular vai perguntar se pode. É só dizer que sim — sem isso, não dá para avisar

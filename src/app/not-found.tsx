@@ -17,7 +17,7 @@ export default function NotFound() {
           href="/"
           className="display rounded-2xl border-[3px] border-ink bg-morango px-5 py-3 text-base text-paper shadow-[0_4px_0_var(--color-ink)] transition-transform hover:-translate-y-[2px]"
         >
-          Voltar para a turma
+          Voltar para o Bibuaidi
         </Link>
       </div>
     </Screen>

@@ -28,7 +28,7 @@ export function LevelBar({ progress, palette, compact = false }: LevelBarProps) 
         <p className="mt-1.5 text-xs text-ink/60">
           {progress.nextStep
             ? `Próximo passo: ${progress.nextStep}`
-            : "Perfil completo. A turma não tem mais desculpa."}
+            : "Perfil completo. O Bibuaidi não tem mais desculpa."}
         </p>
       )}
     </div>

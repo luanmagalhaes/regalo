@@ -135,7 +135,7 @@ export function PhotoCropper({ photo, accent, onDone, onCancel }: PhotoCropperPr
         </label>
 
         <p className="text-center text-xs text-ink/55">
-          O pedaço dentro do quadrado é o que a turma vai ver.
+          O pedaço dentro do quadrado é o que o Bibuaidi vai ver.
         </p>
 
         {problem ? (

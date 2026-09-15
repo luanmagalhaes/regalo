@@ -1,12 +1,12 @@
 export const brand = {
   name: "Regalo",
-  tagline: "A lista de presentes do bibuaidi.",
+  tagline: "A lista de presentes do Bibuaidi.",
   ownerCall: "Esse é o seu espaço, edite como quiser.",
 } as const;
 
 export const copy = {
   home: {
-    title: "Quem está na turma",
+    title: "Quem está no Bibuaidi",
     empty: "Ninguém por aqui ainda. Crie o primeiro perfil.",
     addProfile: "Criar um perfil",
     tracker: "Próximos aniversários",
@@ -20,7 +20,7 @@ export const copy = {
     dislikesTitle: "Não curte",
     plentyTitle: "Já tem demais",
     wishTitle: "Minha dica de presente",
-    wishHint: "Campo aberto: escreva o que quiser que a turma saiba antes de comprar.",
+    wishHint: "Campo aberto: escreva o que quiser que o Bibuaidi saiba antes de comprar.",
     careTitle: "Alergia ou restrição",
     careEmpty: "Nada declarado.",
     stickersHint: "Arraste os adesivos com o dedo. Toque em um para girar, aumentar ou tirar.",
@@ -42,7 +42,7 @@ export const copy = {
   },
   errors: {
     nameRequired: "Falta o nome.",
-    nameTaken: "Já tem alguém com esse nome na turma.",
+    nameTaken: "Já tem alguém com esse nome no Bibuaidi.",
     labelRequired: "Dê um nome para o item.",
     valueRequired: "Escreva o tamanho ou a medida.",
     birthdayInvalid: "Essa data de nascimento não serve. Confira o dia, o mês e o ano.",

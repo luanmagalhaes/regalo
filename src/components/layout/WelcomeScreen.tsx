@@ -30,7 +30,7 @@ export function WelcomeScreen({ onIn }: WelcomeScreenProps) {
 
       setRoster(fresh);
     } catch {
-      setProblem("Não consegui carregar a turma. Veja sua conexão.");
+      setProblem("Não consegui carregar o Bibuaidi. Veja sua conexão.");
     } finally {
       setLoading(false);
     }

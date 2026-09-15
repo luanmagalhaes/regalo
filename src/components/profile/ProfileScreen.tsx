@@ -44,7 +44,7 @@ const tourSteps: readonly TourStep[] = [
     target: "items",
     emoji: "👕",
     title: "Tamanhos e itens",
-    body: "Cada desenho é um item. Toque em um para editar ou apagar. Roupa e calçado pedem o número; doce e livro pedem só o gosto.",
+    body: "Cada desenho é um item. Toque em um e abre um balão com tudo que foi escrito — inclusive o texto que não coube no quadradinho. Lá dentro tem o botão de editar.",
   },
   {
     target: "tags",
@@ -153,7 +153,7 @@ export function ProfileScreen({
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <Button variant="paper" size="lg" onClick={onBack}>
-              ← Turma
+              ← Bibuaidi
             </Button>
             <span data-tour="add" className="flex-1">
               <Button
@@ -431,7 +431,7 @@ export function ProfileScreen({
             rows={2}
             readOnly={!canEdit}
             lang="pt-BR"
-            placeholder="Alergia, restrição alimentar, algo que a turma precisa saber."
+            placeholder="Alergia, restrição alimentar, algo que o Bibuaidi precisa saber."
             onBlur={(event) => {
               const next = event.target.value.trim();
 
@@ -538,7 +538,7 @@ export function ProfileScreen({
           confirmLabel="Apagar"
           cancelLabel="Deixar como está"
           busy={busy}
-          body={<p>Esse item some do perfil para todo mundo da turma.</p>}
+          body={<p>Esse item some do perfil para todo mundo do Bibuaidi.</p>}
           onCancel={() => setConfirmingItem(null)}
           onConfirm={() => {
             onDeleteItem(confirmingItem.id);

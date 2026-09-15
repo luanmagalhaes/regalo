@@ -61,7 +61,7 @@ export function NewProfileSheet({ busy, onCreate, onClose }: NewProfileSheetProp
 
   return (
     <Sheet
-      title="Novo perfil na turma"
+      title="Novo perfil no Bibuaidi"
       subtitle="Depois é só entrar nele e decorar do seu jeito."
       accent={paletteFor(palette).soft}
       onClose={onClose}
@@ -77,7 +77,7 @@ export function NewProfileSheet({ busy, onCreate, onClose }: NewProfileSheetProp
           value={name}
           maxLength={32}
           autoCapitalize="words"
-          placeholder="como a turma chama a pessoa"
+          placeholder="como o Bibuaidi chama a pessoa"
           onChange={(event) => {
             setName(event.target.value);
             setProblem(null);

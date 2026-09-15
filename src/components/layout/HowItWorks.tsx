@@ -17,7 +17,7 @@ const slides: readonly Slide[] = [
   {
     emoji: "🎁",
     title: "Pra que serve",
-    body: "Aqui fica o tamanho e o gosto de cada um da turma. Ninguém mais precisa perguntar o número do pé três dias antes do aniversário.",
+    body: "Aqui fica o tamanho e o gosto de cada um do Bibuaidi. Ninguém mais precisa perguntar o número do pé três dias antes do aniversário.",
     art: "items",
   },
   {
@@ -35,7 +35,7 @@ const slides: readonly Slide[] = [
   {
     emoji: "🎂",
     title: "Aniversário no radar",
-    body: "Coloque sua data e o app avisa a turma quinze dias antes. Dá tempo de comprar sem correria.",
+    body: "Coloque sua data e o app avisa o Bibuaidi quinze dias antes. Dá tempo de comprar sem correria.",
     art: "cake",
   },
   {

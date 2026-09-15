@@ -1,6 +1,6 @@
 export const statusMessages: Record<number, string> = {
   400: "Esse pedido não fez sentido para o Regalo.",
-  401: "A senha da turma não vale mais. Entre de novo.",
+  401: "Sua entrada expirou. Escolha seu nome e entre de novo.",
   403: "Essa ação não está liberada aqui.",
   404: "Não encontrei esse perfil.",
   409: "Alguém mexeu nisso antes de você. Recarregue a lista.",

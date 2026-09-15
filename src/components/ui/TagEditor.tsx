@@ -66,10 +66,10 @@ export function TagEditor({
           tags.map((tag) => (
             <li
               key={tag}
-              className="animate-pop-in flex items-center gap-1.5 rounded-full border-[3px] border-ink px-3 py-1.5 text-sm font-semibold text-ink"
+              className="animate-pop-in flex max-w-full items-start gap-1.5 rounded-[1.25rem] border-[3px] border-ink px-3 py-1.5 text-sm font-semibold text-ink"
               style={{ backgroundColor: accent }}
             >
-              <span className="max-w-[12rem] truncate">{tag}</span>
+              <span className="min-w-0 break-words">{tag}</span>
               {readOnly ? null : (
               <button
                 type="button"

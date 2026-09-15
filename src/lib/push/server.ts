@@ -2,7 +2,7 @@ import webpush from "web-push";
 import { countdownLabel, daysUntilBirthday, nearWindow } from "@/lib/birthday";
 import { serverClient } from "@/lib/supabase/server";
 
-export const contact = "mailto:regalo@bibuaidi.app";
+export const contact = "mailto:regalo@Bibuaidi.app";
 
 interface SubscriptionRow {
   id: string;
@@ -53,7 +53,7 @@ export async function sendBirthdayNotices(now = new Date()): Promise<NoticeResul
   ]);
 
   if (people.error || subscriptions.error || notices.error) {
-    throw new Error("não consegui ler os dados para avisar a turma");
+    throw new Error("não consegui ler os dados para avisar o Bibuaidi");
   }
 
   const year = now.getFullYear();

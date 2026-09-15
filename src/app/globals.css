@@ -179,6 +179,48 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
+@keyframes balloon-pop {
+  0% { transform: scale(0.35) translate3d(0, 40px, 0) rotate(-6deg); opacity: 0; }
+  55% { transform: scale(1.08) translate3d(0, -8px, 0) rotate(2deg); opacity: 1; }
+  78% { transform: scale(0.97) translate3d(0, 4px, 0) rotate(-1deg); }
+  100% { transform: scale(1) translate3d(0, 0, 0) rotate(0deg); opacity: 1; }
+}
+
+@keyframes balloon-fly {
+  0%, 100% { transform: translate3d(-6px, 0, 0) rotate(-2.5deg); }
+  25% { transform: translate3d(0, -10px, 0) rotate(0.5deg); }
+  50% { transform: translate3d(6px, -14px, 0) rotate(2.5deg); }
+  75% { transform: translate3d(2px, -6px, 0) rotate(0.5deg); }
+}
+
+@keyframes balloon-drift {
+  0% { transform: translate3d(0, 18px, 0) rotate(-6deg); opacity: 0; }
+  20% { opacity: 0.9; }
+  100% { transform: translate3d(0, -120px, 0) rotate(8deg); opacity: 0; }
+}
+
+@keyframes string-sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+
+@utility animate-balloon-fly {
+  animation:
+    balloon-pop 460ms var(--ease-swing) both,
+    balloon-fly 5200ms ease-in-out 460ms infinite;
+  will-change: transform, opacity;
+}
+
+@utility animate-balloon-drift {
+  animation: balloon-drift 5200ms ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@utility animate-string-sway {
+  animation: string-sway 5200ms ease-in-out infinite;
+  will-change: transform;
+}
+
 @keyframes shine-bar {
   from { transform: translateX(-110%); }
   to { transform: translateX(240%); }
